@@ -1,14 +1,20 @@
 package profile
 
 import (
+	"bytes"
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/spf13/afero"
 )
+
+const idMax = 31
+const idMin = 0
+const profileLen = 24
 
 type ID byte
 
@@ -18,11 +24,66 @@ type Point struct {
 	Torque byte
 }
 
+func SaveProfile(p *Profile, fileName string, fs afero.Fs) error {
+	csv, err := p.MarshalCSV()
+	if err != nil {
+		return err
+	}
+	err = afero.WriteFile(fs, fileName, csv, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Profile contains a set of calibration points for the drill
 type Profile struct {
 	Fields map[ID]Point
 }
 
+func (p *Profile) Validate() error {
+	if len(p.Fields) > profileLen {
+		return fmt.Errorf("profile should only have %d fields", profileLen)
+	}
+	for id := range p.Fields {
+		if id < idMin || id > idMax {
+			return fmt.Errorf("invalid profile parameter: %d should be between %d and %d", id, idMin, idMax)
+		}
+	}
+	return nil
+}
+
+func (p *Profile) MarshalCSV() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	writer := csv.NewWriter(buf)
+	err := writer.Write(WriteHeader())
+	if err != nil {
+		return nil, err
+	}
+
+	for id, point := range p.Fields {
+		err := writer.Write(WriteRow(id, point))
+		if err != nil {
+			return nil, err
+		}
+	}
+	writer.Flush()
+	return buf.Bytes(), nil
+}
+
+func WriteHeader() []string {
+	return []string{FieldID, Torque, AD}
+}
+
+func WriteRow(id ID, point Point) []string {
+	return []string{
+		strconv.Itoa(int(id)),
+		strconv.Itoa(int(point.AD)),
+		strconv.Itoa(int(point.Torque)),
+	}
+}
+
+// LoadProfile takes an input file path and returns a Profile struct
 func LoadProfile(filepath string, fs afero.Fs) (*Profile, error) {
 	file, err := afero.ReadFile(fs, filepath)
 	if err != nil {

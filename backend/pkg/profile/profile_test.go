@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -85,4 +86,75 @@ func TestLoadProfileInvalidChar(t *testing.T) {
 	profile, err := LoadProfile(fileName, fs)
 	assert.EqualError(t, err, "error parsing profile: strconv.Atoi: parsing \"\\t\\t1\": invalid syntax")
 	assert.Nil(t, profile)
+}
+
+func TestWriteProfileValid(t *testing.T) {
+	profile := Profile{
+		Fields: map[ID]Point{
+			0x33: {
+				Torque: 0x30,
+				AD:     0x30,
+			},
+		},
+	}
+	result, err := profile.MarshalCSV()
+	assert.NoError(t, err)
+	assert.Equal(t, "ID,Torque,TorqueAD\n51,48,48\n", string(result))
+}
+
+func TestSaveProfile(t *testing.T) {
+	fs := afero.NewMemMapFs()
+	fileName := "testprofile.csv"
+	profile := &Profile{
+		Fields: map[ID]Point{
+			0x33: {
+				Torque: 0x30,
+				AD:     0x30,
+			},
+		},
+	}
+	err := SaveProfile(profile, fileName, fs)
+	assert.NoError(t, err)
+	readBack, err := afero.ReadFile(fs, fileName)
+	assert.NoError(t, err)
+	assert.Equal(t, "ID,Torque,TorqueAD\n51,48,48\n", string(readBack))
+}
+
+func TestValidateProfileTooMany(t *testing.T) {
+	profile := &Profile{}
+	profile.Fields = make(map[ID]Point)
+	for i := 0; i < 100; i++ {
+		profile.Fields[ID(i)] = Point{
+			AD:     0x30,
+			Torque: 0x33,
+		}
+	}
+	err := profile.Validate()
+	assert.EqualError(t, err, fmt.Sprintf("profile should only have %d fields", profileLen))
+}
+
+func TestValidateProfileInvalidID(t *testing.T) {
+	profile := &Profile{
+		Fields: map[ID]Point{
+			0xFF: {
+				Torque: 0x30,
+				AD:     0x30,
+			},
+		},
+	}
+	err := profile.Validate()
+	assert.EqualError(t, err, fmt.Sprintf("invalid profile parameter: 255 should be between %d and %d", idMin, idMax))
+}
+
+func TestValidateProfileValid(t *testing.T) {
+	profile := &Profile{
+		Fields: map[ID]Point{
+			0x00: {
+				Torque: 0x30,
+				AD:     0x30,
+			},
+		},
+	}
+	err := profile.Validate()
+	assert.NoError(t, err)
 }
