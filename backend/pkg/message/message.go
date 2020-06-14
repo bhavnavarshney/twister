@@ -26,7 +26,7 @@ type DrillID struct {
 }
 
 func (id *DrillID) Marshal() []byte {
-	return append([]byte{id.header}, id.message...)
+	return append([]byte{id.header}, id.message[:]...)
 }
 
 type Command struct {
