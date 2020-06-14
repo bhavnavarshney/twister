@@ -17,9 +17,5 @@ Scenarios
 
 A fake version of the serialport is available which replicates the behavior of the motor. Useful for testing and demo purposes.
 
-# Exposed methods
 
-- HandleKeepalives
-- Enqueue Message
-- GetMotorInfo
-- Pass in the port explicitly
+
