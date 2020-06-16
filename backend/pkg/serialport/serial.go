@@ -2,7 +2,10 @@ package serialport
 
 import (
 	"bytes"
+	"time"
 
+	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
+	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/nibble"
 	"github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
 )
@@ -22,27 +25,27 @@ type SerialPortDriver struct {
 	Log           *logrus.Logger
 }
 
-func (sp *SerialPortDriver) Send(m Message) {
-	sp.MessageBuffer = append(sp.MessageBuffer, m)
-}
+// func (sp *SerialPortDriver) Send(m Message) {
+// 	sp.MessageBuffer = append(sp.MessageBuffer, m)
+// }
 
-func (sp *SerialPortDriver) Run() {
-	for {
-		err := sp.SendMessage(sp.MessageBuffer[0])
-		if err != nil {
-			sp.Log.Printf("Error sending message")
-		}
-	}
-}
+// func (sp *SerialPortDriver) Run() {
+// 	for {
+// 		err := sp.SendMessage(sp.MessageBuffer[0])
+// 		if err != nil {
+// 			sp.Log.Printf("Error sending message")
+// 		}
+// 	}
+// }
 
 func (sp *SerialPortDriver) SendMessage(m Message) error {
-	err := sp.write(m.Marshal())
+	_, err := sp.write(m.Marshal())
 	if err != nil {
 		return err
 	}
 
 	buf := make([]byte, 1)
-	err = sp.read(buf)
+	_, err = sp.read(buf)
 	if err != nil {
 		return err
 	}
@@ -55,15 +58,73 @@ func (sp *SerialPortDriver) SendMessage(m Message) error {
 	return nil
 }
 
+func (sp *SerialPortDriver) SendCommand(m Message) ([]byte, error) {
+	_, err := sp.write(m.Marshal())
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if response length is zero
+	buf := make([]byte, m.ResponseLen())
+	_, err = sp.read(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf, nil
+}
+
+func MakeCommand(dataInfo byte, responseLen int) *Command {
+	return &Command{
+		header:      0x21,
+		dataInfo:    dataInfo,
+		checkSum:    NibbledChecksum([]byte{dataInfo}),
+		responseLen: responseLen,
+	}
+}
+
+func NibbledChecksum(input []byte) [2]byte {
+	hi, low := nibble.Break(message.Checksum(input))
+	return [2]byte{hi, low}
+}
+
+type Command struct {
+	header      byte
+	dataInfo    byte
+	checkSum    [2]byte
+	responseLen int
+	response    []byte
+}
+
+func (k *Command) Marshal() []byte {
+	return []byte{k.header, k.dataInfo, k.checkSum[0], k.checkSum[1]}
+}
+
+func (k *Command) Response() []byte {
+	return k.response
+}
+
+func (k *Command) ResponseLen() int {
+	return k.responseLen
+}
+
+func (k *Command) Retry() int {
+	return 3
+}
+
+func (k *Command) Timeout() time.Time {
+	return time.Time{}
+}
+
 const keepAlive = 0x07
 
 func (sp *SerialPortDriver) SendKeepAlive() bool {
-	err := sp.write([]byte{keepAlive})
+	_, err := sp.write([]byte{keepAlive})
 	if err != nil {
 		return false
 	}
 	buf := make([]byte, 1)
-	err = sp.read(buf)
+	_, err = sp.read(buf)
 	if err != nil {
 		return false
 	}
@@ -71,20 +132,23 @@ func (sp *SerialPortDriver) SendKeepAlive() bool {
 }
 
 // Wrap write for easier debugging
-func (sp *SerialPortDriver) write(out []byte) error {
+func (sp *SerialPortDriver) write(out []byte) (int, error) {
 	n, err := sp.Port.Write(out)
 	sp.Log.Debugf("wrote %d bytes", n)
-	return err
+	if err != nil {
+		sp.Log.Fatal(err)
+	}
+	return n, err
 }
 
 // Wrap read for easier debugging
-func (sp *SerialPortDriver) read(b []byte) error {
+func (sp *SerialPortDriver) read(b []byte) (int, error) {
 	n, err := sp.Port.Read(b)
 	sp.Log.Debugf("read %d bytes", n)
 	if err != nil {
 		sp.Log.Fatal(err)
 	}
-	return err
+	return n, err
 }
 
 type Port interface {
@@ -98,8 +162,10 @@ type Message interface {
 	Marshal() []byte
 	// Response returns an expected response
 	Response() []byte
+	// Number of bytes expected
+	ResponseLen() int
 	// Retry returns the number of time to retry when sending a message
 	Retry() int
 	// Timeout in milliseconds
-	Timeout() int
+	Timeout() time.Time
 }

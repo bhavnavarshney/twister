@@ -14,27 +14,33 @@ func MakeFakePort(config *serial.Config) (*FakePort, error) {
 
 // FakePort implements the Port interface and is used for testing without a real hardware device
 type FakePort struct {
-	writeBuffer []byte
-	readBuffer  []byte
-	config      *serial.Config
-	Log         *logrus.Logger
+	writeLog   []byte
+	readBuffer []byte
+	config     *serial.Config
+	Log        *logrus.Logger
 }
 
 var responseMap = map[byte][]byte{
 	0x07: {0x07},
+	0x70: {0x70},
+	0x04: {0x21, 0x04, 0x35, 0x37, 0x33, 0x32, 0x34, 0x37, 0x34, 0x37, 0x33, 0x39, 0x33, 0x38, 0x33, 0x35, 0x33, 0x30, 0x45, 0x39},
 }
 
 func (mp *FakePort) Write(out []byte) (int, error) {
 	mp.Log.Println("Writing to mock port")
-	mp.writeBuffer = append(mp.writeBuffer, out...)
-	mp.readBuffer = append(mp.readBuffer, responseMap[out[0]]...)
+	mp.writeLog = append(mp.writeLog, out...)
+	// we always read the second byte to see what to do
+	mp.readBuffer = append(mp.readBuffer, responseMap[out[1]]...)
 	return len(out), nil
 }
 
 // Todo: Extend for multiple bytes
 func (mp *FakePort) Read(b []byte) (int, error) {
 	mp.Log.Println("Reading from Mock Port")
-	b[0] = mp.readBuffer[0]
+	mp.Log.Printf("Read %X", mp.readBuffer)
+	if len(mp.readBuffer) > 0 {
+		b = mp.readBuffer
+	}
 	return len(b), nil
 }
 

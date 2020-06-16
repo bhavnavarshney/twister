@@ -17,3 +17,26 @@ func TestOpenSerialPort(t *testing.T) {
 	retVal := d.SendKeepAlive()
 	assert.True(t, retVal)
 }
+
+func TestSendMessage(t *testing.T) {
+	log := logrus.New()
+	message := MakeCommand(0x07, 1)
+	c := &serial.Config{Name: "COM3", Baud: 9600}
+	p, err := MakeFakePort(c)
+	assert.NoError(t, err)
+	d := MakeSerialPortDriver(p, log)
+	err = d.SendMessage(message)
+	assert.NoError(t, err)
+}
+
+func TestSendCommand(t *testing.T) {
+	log := logrus.New()
+	message := MakeCommand(0x07, 1)
+	c := &serial.Config{Name: "COM3", Baud: 9600}
+	p, err := MakeFakePort(c)
+	assert.NoError(t, err)
+	d := MakeSerialPortDriver(p, log)
+	response, err := d.SendCommand(message)
+	assert.NoError(t, err)
+	t.Log(response)
+}
