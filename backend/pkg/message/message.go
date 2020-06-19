@@ -3,7 +3,6 @@
 package message
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -57,13 +56,14 @@ type DrillID struct {
 func (id *DrillID) Unmarshal(input []byte) error {
 	id.header = input[0]
 	id.dataInfo = input[1]
-	data, err := Decode(input[2:])
+	decodedData, err := Decode(input[2:])
 	if err != nil {
 		return err
 	}
-	copy(id.message[:], data)
-	id.checksum = input[len(input)-1]
-	return nil
+	copy(id.message[:], decodedData)
+	id.checksum = decodedData[len(decodedData)-1]
+	fmt.Printf("%X", id.checksum)
+	return id.isValidChecksum()
 }
 
 func (id *DrillID) ToByte() []byte {
@@ -79,17 +79,17 @@ func (id *DrillID) ToString() string {
 }
 
 func Checksum(input []byte) byte {
-	var byteSum byte
+	byteSum := byte(0xFF)
 	for i := range input {
-		byteSum += input[i]
+		byteSum = byte(byteSum - input[i])
 	}
-	return 0xFF - byteSum
+	return byteSum
 }
 
 func (id *DrillID) isValidChecksum() error {
 	calc := Checksum(append([]byte{id.dataInfo}, id.message[:]...))
 	if calc != id.checksum {
-		return errors.New("Checksum mismatch")
+		return fmt.Errorf("checksum mismatch, expected %x, received %x", calc, id.checksum)
 	}
 	return nil
 }
