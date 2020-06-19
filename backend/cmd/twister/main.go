@@ -79,13 +79,15 @@ func CmdInfo(ctx *cli.Context) error {
 		return err
 	}
 	d := serialport.MakeSerialPortDriver(p, log)
-	drillIDCommand := serialport.MakeCommand(0x04, 20)
-	response, err := d.SendCommand(drillIDCommand)
+	drillTypeCommand := serialport.MakeCommand(0x04, 20)
+	response, err := d.SendCommand(drillTypeCommand)
 	if err != nil {
 		return err
 	}
-	drillID := message.DrillID{}
-	err = drillID.Unmarshal(response)
+	drillType := message.DrillType{}
+	err = drillType.Unmarshal(response)
+	log.Printf("Response Hex: %X", drillType.ToByte())
+	log.Printf("Response ASCII: %s", drillType.ToString())
 	if err != nil {
 		return err
 	}
