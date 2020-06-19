@@ -13,3 +13,17 @@ func TestEncode(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, result)
 }
+
+func TestToUInt16(t *testing.T) {
+	input := []byte{0xAF, 0xEF}
+	expected := []uint16{0xAFEF}
+	result := ToUInt16(input)
+	assert.Equal(t, expected, result)
+}
+
+func TestFromUInt16(t *testing.T) {
+	input := []uint16{0xAFEF}
+	expected := []byte{0xAF, 0xEF}
+	result := FromUInt16(input)
+	assert.Equal(t, expected, result)
+}
