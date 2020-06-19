@@ -37,9 +37,12 @@ func (mp *FakePort) Write(out []byte) (int, error) {
 // Todo: Extend for multiple bytes
 func (mp *FakePort) Read(b []byte) (int, error) {
 	mp.Log.Println("Reading from Mock Port")
-	mp.Log.Printf("Read %X", mp.readBuffer)
+
 	if len(mp.readBuffer) > 0 {
-		b = mp.readBuffer
+		mp.Log.Printf("Read %X", mp.readBuffer)
+		for i := range b {
+			b[i] = mp.readBuffer[i]
+		}
 	}
 	return len(b), nil
 }
