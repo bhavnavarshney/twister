@@ -15,6 +15,32 @@ const (
 	bulkParam    = 0x14
 )
 
+type TorqueData struct {
+	header   byte
+	dataInfo byte
+	message  [12]uint16
+	checksum byte
+}
+
+func (td *TorqueData) Marshal() []byte {
+	return []byte{}
+}
+
+func (td *TorqueData) Unmarshal(input []byte) error {
+	td.header = input[0]
+	td.dataInfo = input[1]
+	td.checksum = input[len(input)-1]
+	data, err := Decode(input[2:])
+	for i := range td.message {
+		td.message[i] = uint16(data[i])<<8 | uint16(data[i+1])
+	}
+	if err != nil {
+		return err
+	}
+	fmt.Println(data)
+	return nil
+}
+
 type DrillType struct {
 	header   byte
 	dataInfo byte
@@ -22,26 +48,34 @@ type DrillType struct {
 	checksum byte
 }
 
-func (id *DrillType) Unmarshal(input []byte) error {
-	id.header = input[0]
-	id.dataInfo = input[1]
+func (t *DrillType) Unmarshal(input []byte) error {
+	t.header = input[0]
+	t.dataInfo = input[1]
 	data, err := Decode(input[2:])
 	if err != nil {
 		return err
 	}
-	copy(id.message[:], data)
-	id.checksum = input[len(input)-1]
+	copy(t.message[:], data)
+	t.checksum = data[len(data)-1]
+	return t.isValidChecksum()
+}
+
+func (t *DrillType) isValidChecksum() error {
+	calc := Checksum(append([]byte{t.dataInfo}, t.message[:]...))
+	if calc != t.checksum {
+		return fmt.Errorf("checksum mismatch, expected %x, received %x", calc, t.checksum)
+	}
 	return nil
 }
 
-func (id *DrillType) ToByte() []byte {
-	return id.message[:]
+func (t *DrillType) ToByte() []byte {
+	return t.message[:]
 }
 
-func (id *DrillType) ToString() string {
+func (t *DrillType) ToString() string {
 	var idStr string
-	for i := range id.message {
-		idStr += fmt.Sprintf("%c", id.message[i])
+	for i := range t.message {
+		idStr += fmt.Sprintf("%c", t.message[i])
 	}
 	return idStr
 }
