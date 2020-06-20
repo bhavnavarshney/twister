@@ -18,12 +18,18 @@ const (
 type TorqueData struct {
 	header   byte
 	dataInfo byte
-	message  [12]uint16
+	message  [24]byte
 	checksum byte
 }
 
-func (td *TorqueData) Marshal() []byte {
-	return []byte{}
+func (td *TorqueData) Marshal() ([]byte, error) {
+	dataInfoAdded := append([]byte{td.dataInfo}, td.message[:]...)
+	td.checksum = Checksum(dataInfoAdded)
+	encodedData, err := Encode(append(dataInfoAdded, td.checksum))
+	if err != nil {
+		return nil, err
+	}
+	return encodedData, nil
 }
 
 func (td *TorqueData) Unmarshal(input []byte) error {
@@ -31,13 +37,20 @@ func (td *TorqueData) Unmarshal(input []byte) error {
 	td.dataInfo = input[1]
 	td.checksum = input[len(input)-1]
 	data, err := Decode(input[2:])
-	for i := range td.message {
-		td.message[i] = uint16(data[i])<<8 | uint16(data[i+1])
-	}
 	if err != nil {
 		return err
 	}
+	copy(td.message[:], data)
 	fmt.Println(data)
+	td.checksum = data[len(data)-1]
+	return td.isValidChecksum()
+}
+
+func (t *TorqueData) isValidChecksum() error {
+	calc := Checksum(append([]byte{t.dataInfo}, t.message[:]...))
+	if calc != t.checksum {
+		return fmt.Errorf("checksum mismatch, expected %x, received %x", calc, t.checksum)
+	}
 	return nil
 }
 
