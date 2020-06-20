@@ -6,7 +6,7 @@ The serial connection is a duplex protocol implemented over two wires. Therefore
 
 ## KeepAlive
 
-The motor responds to 0x70 with 0x70 when connected. This is checked every 0.5 seconds to indicate the motor is connected.
+The motor responds to 0x07 with 0x07 when connected. This is checked every 0.5 seconds to indicate the motor is connected.
 
 Scenarios
 - Verify that the device is connected initially

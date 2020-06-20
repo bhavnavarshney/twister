@@ -116,10 +116,10 @@ func (k *Command) Timeout() time.Time {
 	return time.Time{}
 }
 
-const keepAlive = 0x07
+const KeepAlive = 0x07
 
 func (sp *SerialPortDriver) SendKeepAlive() bool {
-	_, err := sp.write([]byte{keepAlive})
+	_, err := sp.write([]byte{KeepAlive})
 	if err != nil {
 		return false
 	}
@@ -128,7 +128,7 @@ func (sp *SerialPortDriver) SendKeepAlive() bool {
 	if err != nil {
 		return false
 	}
-	return buf[0] == keepAlive
+	return buf[0] == KeepAlive
 }
 
 // Wrap write for easier debugging

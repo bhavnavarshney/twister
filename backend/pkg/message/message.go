@@ -7,18 +7,19 @@ import (
 )
 
 const (
-	drillType    = 0x04
-	drillID      = 0x05
-	singleParam  = 0x06
-	torqueOffset = 0x11
-	readOffset   = 0x13
-	bulkParam    = 0x14
+	DrillTypeMsg        = 0x04
+	DrillIDMsg          = 0x05
+	SingleParamMsg      = 0x06
+	TorqueOffsetMsg     = 0x11
+	ReadOffsetMsg       = 0x13
+	BulkParamSendMsg    = 0x14
+	BulkParamReceiveMsg = 0x15
 )
 
 type TorqueData struct {
 	header   byte
 	dataInfo byte
-	message  [24]byte
+	message  [24 * 4]byte
 	checksum byte
 }
 
@@ -52,6 +53,10 @@ func (t *TorqueData) isValidChecksum() error {
 		return fmt.Errorf("checksum mismatch, expected %x, received %x", calc, t.checksum)
 	}
 	return nil
+}
+
+func (t *TorqueData) ToByte() []byte {
+	return t.message[:]
 }
 
 type DrillType struct {
