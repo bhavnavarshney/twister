@@ -138,18 +138,12 @@ func CmdWrite(c *cli.Context) error {
 		return err
 	}
 	d := serialport.MakeSerialPortDriver(p, log)
-
-	bulkReceive := serialport.MakeCommand(message.BulkParamReceiveMsg, 24*4+4)
-	response, err := d.SendCommand(bulkReceive)
+	data := new([24 * 4]byte)
+	torqueData := message.MakeTorqueData(*data)
+	err = d.SendMessage(torqueData)
 	if err != nil {
 		return err
 	}
-
-	params := message.TorqueData{}
-	err = params.Unmarshal(response)
-	if err != nil {
-		return err
-	}
-	log.Printf("Response Hex: %X", params.ToByte())
+	log.Printf("Successfully Sent Hex: %X", data)
 	return nil
 }

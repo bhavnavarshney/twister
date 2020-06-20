@@ -2,6 +2,7 @@ package serialport
 
 import (
 	"bytes"
+	"errors"
 	"time"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
@@ -44,16 +45,18 @@ func (sp *SerialPortDriver) SendMessage(m Message) error {
 		return err
 	}
 
-	buf := make([]byte, 1)
+	buf := make([]byte, m.ResponseLen())
 	_, err = sp.read(buf)
 	if err != nil {
 		return err
 	}
+	sp.Log.Printf("Received response: %x", buf)
 
 	// If there's an expected response, check it
 	if len(m.Response()) > 0 && !bytes.Equal(m.Response(), buf) {
 		// Retry, bump retry count
-		return sp.SendMessage(m)
+		//return sp.SendMessage(m)
+		return errors.New("Unable to send message")
 	}
 	return nil
 }
@@ -112,8 +115,8 @@ func (k *Command) Retry() int {
 	return 3
 }
 
-func (k *Command) Timeout() time.Time {
-	return time.Time{}
+func (k *Command) Timeout() time.Duration {
+	return time.Second
 }
 
 const KeepAlive = 0x07
@@ -167,5 +170,5 @@ type Message interface {
 	// Retry returns the number of time to retry when sending a message
 	Retry() int
 	// Timeout in milliseconds
-	Timeout() time.Time
+	Timeout() time.Duration
 }

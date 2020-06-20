@@ -4,9 +4,12 @@ package message
 
 import (
 	"fmt"
+	"time"
 )
 
 const (
+	HeaderByte          = 0x21
+	OkStatus            = 0x47
 	DrillTypeMsg        = 0x04
 	DrillIDMsg          = 0x05
 	SingleParamMsg      = 0x06
@@ -16,6 +19,15 @@ const (
 	BulkParamReceiveMsg = 0x15
 )
 
+func MakeTorqueData(message [24 * 4]byte) *TorqueData {
+	return &TorqueData{
+		header:   HeaderByte,
+		dataInfo: BulkParamSendMsg,
+		message:  message,
+	}
+
+}
+
 type TorqueData struct {
 	header   byte
 	dataInfo byte
@@ -23,11 +35,27 @@ type TorqueData struct {
 	checksum byte
 }
 
-func (td *TorqueData) Marshal() ([]byte, error) {
+func (td *TorqueData) Marshal() []byte {
 	dataInfoAdded := append([]byte{td.dataInfo}, td.message[:]...)
 	td.checksum = Checksum(dataInfoAdded)
 	encodedData := Encode(append(dataInfoAdded, td.checksum))
-	return encodedData, nil
+	return encodedData
+}
+
+func (td *TorqueData) Retry() int {
+	return 1
+}
+
+func (td *TorqueData) Timeout() time.Duration {
+	return time.Second
+}
+
+func (td *TorqueData) Response() []byte {
+	return []byte{OkStatus}
+}
+
+func (td *TorqueData) ResponseLen() int {
+	return 1
 }
 
 func (td *TorqueData) Unmarshal(input []byte) error {
