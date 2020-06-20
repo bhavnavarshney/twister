@@ -33,6 +33,7 @@ func (mp *FakePort) Write(out []byte) (int, error) {
 	mp.writeLog = append(mp.writeLog, out...)
 	// we always read the second byte to see what to do
 	mp.readBuffer = append(mp.readBuffer, responseMap[out[1]]...)
+	mp.Log.Printf("Adding %X to read buffer", responseMap[out[1]])
 	return len(out), nil
 }
 
@@ -50,6 +51,6 @@ func (mp *FakePort) Read(b []byte) (int, error) {
 }
 
 func (mp *FakePort) Close() error {
-	mp.Log.Debugln("Closing Mock Port")
+	mp.Log.Println("Closing Mock Port")
 	return nil
 }

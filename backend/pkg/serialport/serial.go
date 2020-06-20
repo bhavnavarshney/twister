@@ -46,11 +46,12 @@ func (sp *SerialPortDriver) SendMessage(m Message) error {
 	}
 
 	buf := make([]byte, m.ResponseLen())
-	_, err = sp.read(buf)
+	numBytesRead, err := sp.read(buf)
 	if err != nil {
 		return err
 	}
-	sp.Log.Printf("Received response: %x", buf)
+	sp.Log.Printf("Read %d bytes from port", numBytesRead)
+	sp.Log.Printf("Received response: %d", buf)
 
 	// If there's an expected response, check it
 	if len(m.Response()) > 0 && !bytes.Equal(m.Response(), buf) {
