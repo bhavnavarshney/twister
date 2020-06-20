@@ -14,7 +14,7 @@ func Decode(input []byte) ([]byte, error) {
 	// Convert from Ascii string to hex
 	newBytes, err := hex.DecodeString(hexStr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode input %X with error: %w", input, err)
 	}
 	return newBytes, nil
 }

@@ -13,3 +13,11 @@ func TestDecode(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, result)
 }
+
+func TestDecodeWithZeros(t *testing.T) {
+	input := make([]byte, 6)
+	var expected []byte
+	result, err := Decode(input)
+	assert.EqualError(t, err, "failed to decode input 000000000000 with error: encoding/hex: invalid byte: U+0000")
+	assert.Equal(t, expected, result)
+}
