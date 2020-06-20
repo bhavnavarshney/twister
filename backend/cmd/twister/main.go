@@ -9,7 +9,7 @@ import (
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/serialport"
 	"github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 //const serialportname = "/dev/tty.usbserial-AC019QP9"
@@ -18,7 +18,7 @@ func main() {
 	app := &cli.App{
 		Name:  "twister",
 		Usage: "configuration tool for the WD-TMAX drill",
-		Commands: []cli.Command{
+		Commands: []*cli.Command{
 			{
 				Name:    "read",
 				Aliases: []string{"r"},
@@ -53,14 +53,21 @@ func main() {
 				Usage: "language for the greeting",
 			},
 			&cli.StringFlag{
-				Name:  "Port",
-				Value: "COM1",
-				Usage: "e.g COM1 or COM3 on windows or /dev/tty.usbserial-AC019QP9 on *nix",
+				Name:    "port",
+				Aliases: []string{"p"},
+				Value:   "COM1",
+				Usage:   "e.g COM1 or COM3 on windows or /dev/tty.usbserial-AC019QP9 on *nix",
 			},
-			&cli.StringFlag{
-				Name:  "Baudrate",
-				Value: "9600",
-				Usage: "Serial port baudrate",
+			&cli.IntFlag{
+				Name:    "baud",
+				Aliases: []string{"b"},
+				Value:   9600,
+				Usage:   "Serial port baudrate",
+			},
+			&cli.BoolFlag{
+				Name:    "mock",
+				Aliases: []string{"m"},
+				Usage:   "Enables test mode for mock testing without hardware",
 			},
 		},
 	}
@@ -71,19 +78,21 @@ func main() {
 	}
 }
 
-func CmdInfo(ctx *cli.Context) error {
+func CmdInfo(c *cli.Context) error {
 	log := logrus.New()
-	config := &serial.Config{Name: "COM3", Baud: 9600}
+	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
 	p, err := serialport.MakeFakePort(config)
 	if err != nil {
 		return err
 	}
 	d := serialport.MakeSerialPortDriver(p, log)
+
 	drillTypeCommand := serialport.MakeCommand(0x04, 20)
 	response, err := d.SendCommand(drillTypeCommand)
 	if err != nil {
 		return err
 	}
+
 	drillType := message.DrillType{}
 	err = drillType.Unmarshal(response)
 	log.Printf("Response Hex: %X", drillType.ToByte())
