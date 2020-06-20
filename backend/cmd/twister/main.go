@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -24,8 +23,7 @@ func main() {
 				Aliases: []string{"r"},
 				Usage:   "reads the torque profile from the drill",
 				Action: func(c *cli.Context) error {
-					fmt.Println("reading drill to: ", c.Args().First())
-					return nil
+					return CmdRead(c)
 				},
 			},
 			{
@@ -33,8 +31,7 @@ func main() {
 				Aliases: []string{"w"},
 				Usage:   "writes the torque profile to the drill",
 				Action: func(c *cli.Context) error {
-					fmt.Println("writing drill profile to: ", c.Args().First())
-					return nil
+					return CmdWrite(c)
 				},
 			},
 			{
@@ -69,6 +66,11 @@ func main() {
 				Aliases: []string{"m"},
 				Usage:   "Enables test mode for mock testing without hardware",
 			},
+			&cli.BoolFlag{
+				Name:    "verbose",
+				Aliases: []string{"v"},
+				Usage:   "Enables verbose logging",
+			},
 		},
 	}
 
@@ -100,5 +102,54 @@ func CmdInfo(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func CmdRead(c *cli.Context) error {
+	log := logrus.New()
+	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
+	p, err := serialport.MakeFakePort(config)
+	if err != nil {
+		return err
+	}
+	d := serialport.MakeSerialPortDriver(p, log)
+
+	drillTypeCommand := serialport.MakeCommand(message.BulkParamReceiveMsg, 20)
+	response, err := d.SendCommand(drillTypeCommand)
+	if err != nil {
+		return err
+	}
+
+	drillType := message.DrillType{}
+	err = drillType.Unmarshal(response)
+	log.Printf("Response Hex: %X", drillType.ToByte())
+	log.Printf("Response ASCII: %s", drillType.ToString())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CmdWrite(c *cli.Context) error {
+	log := logrus.New()
+	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
+	p, err := serialport.MakeFakePort(config)
+	if err != nil {
+		return err
+	}
+	d := serialport.MakeSerialPortDriver(p, log)
+
+	bulkReceive := serialport.MakeCommand(message.BulkParamReceiveMsg, 24*4+4)
+	response, err := d.SendCommand(bulkReceive)
+	if err != nil {
+		return err
+	}
+
+	params := message.TorqueData{}
+	err = params.Unmarshal(response)
+	if err != nil {
+		return err
+	}
+	log.Printf("Response Hex: %X", params.ToByte())
 	return nil
 }
