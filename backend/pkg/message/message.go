@@ -38,8 +38,9 @@ type TorqueData struct {
 func (td *TorqueData) Marshal() []byte {
 	dataInfoAdded := append([]byte{td.dataInfo}, td.message[:]...)
 	td.checksum = Checksum(dataInfoAdded)
-	encodedData := Encode(append(dataInfoAdded, td.checksum))
-	return encodedData
+	headers := []byte{td.header, td.dataInfo}
+	encodedData := Encode(append(td.message[:], td.checksum))
+	return append(headers, encodedData...)
 }
 
 func (td *TorqueData) Retry() int {
