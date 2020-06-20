@@ -6,14 +6,14 @@ import (
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/nibble"
 )
 
-func Encode(input []byte) ([]byte, error) {
+func Encode(input []byte) []byte {
 	nibbled := nibble.BreakSlice(input)
 	var converted string
 
 	for i := range nibbled {
 		converted += strconv.FormatInt(int64(nibbled[i]), 16)
 	}
-	return []byte(converted), nil
+	return []byte(converted)
 }
 
 func ToUInt16(input []byte) []uint16 {
