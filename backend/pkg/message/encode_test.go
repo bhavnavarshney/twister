@@ -13,6 +13,13 @@ func TestEncode(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
+func TestEncodeCaseSensitive(t *testing.T) {
+	input := []byte{0xEA}
+	expected := []byte{0x45, 0x41}
+	result := Encode(input)
+	assert.Equal(t, expected, result)
+}
+
 func TestToUInt16(t *testing.T) {
 	input := []byte{0xAF, 0xEF}
 	expected := []uint16{0xAFEF}

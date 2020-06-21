@@ -2,6 +2,7 @@ package message
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/nibble"
 )
@@ -13,6 +14,7 @@ func Encode(input []byte) []byte {
 	for i := range nibbled {
 		converted += strconv.FormatInt(int64(nibbled[i]), 16)
 	}
+	converted = strings.ToUpper(converted)
 	return []byte(converted)
 }
 
