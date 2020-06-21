@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -39,7 +38,7 @@ func SaveProfile(p *Profile, fileName string, fs afero.Fs) error {
 
 // Profile contains a set of calibration points for the drill
 type Profile struct {
-	Fields map[ID]Point
+	Fields [24]Point
 }
 
 func (p *Profile) Validate() error {
@@ -55,15 +54,10 @@ func (p *Profile) Validate() error {
 }
 
 func (p *Profile) MarshalBytes() [24 * 2]uint16 {
-	keys := make([]ID, len(p.Fields))
-	for k := range p.Fields {
-		keys = append(keys, k)
-	}
-	sort.Slice(keys, func(i int, j int) bool { return keys[i] < keys[j] })
 	var output [24 * 2]uint16
-	for k := range keys {
-		output[int(k)] = p.Fields[ID(k)].Torque
-		output[int(k)+24] = p.Fields[ID(k)].AD
+	for i := range p.Fields {
+		output[i] = p.Fields[i].Torque
+		output[i+24] = p.Fields[i].AD
 	}
 	return output
 }
@@ -76,7 +70,8 @@ func (p *Profile) MarshalCSV() ([]byte, error) {
 		return nil, err
 	}
 
-	for id, point := range p.Fields {
+	for i, point := range p.Fields {
+		id := ID(i + 1)
 		err := writer.Write(WriteRow(id, point))
 		if err != nil {
 			return nil, err
@@ -110,7 +105,7 @@ func LoadProfile(filepath string, fs afero.Fs) (*Profile, error) {
 		return nil, err
 	}
 
-	p := Profile{Fields: make(map[ID]Point)}
+	p := Profile{}
 
 	for i, row := range rows {
 		if i == 0 {
@@ -124,7 +119,7 @@ func LoadProfile(filepath string, fs afero.Fs) (*Profile, error) {
 		if err != nil {
 			return nil, err
 		}
-		p.Fields[id] = point
+		p.Fields[id-1] = point
 	}
 
 	return &p, nil
@@ -152,22 +147,22 @@ func BuildHeader() []string {
 	return []string{FieldID, Torque, AD}
 }
 
-func ParseRow(row []string) (ID, Point, error) {
+func ParseRow(row []string) (int, Point, error) {
 	var conv []uint16
 	for _, val := range row {
 		result, err := strconv.Atoi(val)
 		if err != nil {
-			return ID(0x00), Point{}, fmt.Errorf("error parsing profile: %w", err)
+			return 0, Point{}, fmt.Errorf("error parsing profile: %w", err)
 		}
 		conv = append(conv, uint16(result))
 	}
 
-	return ID(conv[0]), MakePoint(conv[1:]), nil
+	return int(conv[0]), MakePoint(conv[1:]), nil
 }
 
 func MakePoint(row []uint16) Point {
 	return Point{
-		AD:     row[0],
-		Torque: row[1],
+		Torque: row[0],
+		AD:     row[1],
 	}
 }

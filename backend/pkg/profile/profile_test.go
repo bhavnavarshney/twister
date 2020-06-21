@@ -3,7 +3,6 @@
 package profile
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -15,7 +14,10 @@ func TestLoadValidProfile(t *testing.T) {
 	fs := afero.NewOsFs()
 	profile, err := LoadProfile("../../config/default.csv", fs)
 	assert.NoError(t, err)
-	t.Log(profile)
+	assert.Equal(t, uint16(60), profile.Fields[0].AD)
+	assert.Equal(t, uint16(4), profile.Fields[0].Torque)
+	assert.Equal(t, uint16(94), profile.Fields[23].AD)
+	assert.Equal(t, uint16(7), profile.Fields[23].Torque)
 }
 
 func TestLoadNonExistentProfile(t *testing.T) {
@@ -92,8 +94,8 @@ func TestLoadProfileInvalidChar(t *testing.T) {
 
 func TestWriteProfileValid(t *testing.T) {
 	profile := Profile{
-		Fields: map[ID]Point{
-			0x33: {
+		Fields: [24]Point{
+			0: {
 				Torque: 0x30,
 				AD:     0x30,
 			},
@@ -101,15 +103,15 @@ func TestWriteProfileValid(t *testing.T) {
 	}
 	result, err := profile.MarshalCSV()
 	assert.NoError(t, err)
-	assert.Equal(t, "ID,Torque,TorqueAD\n51,48,48\n", string(result))
+	assert.Equal(t, "ID,Torque,TorqueAD\n1,48,48\n2,0,0\n3,0,0\n4,0,0\n5,0,0\n6,0,0\n7,0,0\n8,0,0\n9,0,0\n10,0,0\n11,0,0\n12,0,0\n13,0,0\n14,0,0\n15,0,0\n16,0,0\n17,0,0\n18,0,0\n19,0,0\n20,0,0\n21,0,0\n22,0,0\n23,0,0\n24,0,0\n", string(result))
 }
 
 func TestSaveProfile(t *testing.T) {
 	fs := afero.NewMemMapFs()
 	fileName := "testprofile.csv"
 	profile := &Profile{
-		Fields: map[ID]Point{
-			0x33: {
+		Fields: [24]Point{
+			0: {
 				Torque: 0x30,
 				AD:     0x30,
 			},
@@ -119,38 +121,12 @@ func TestSaveProfile(t *testing.T) {
 	assert.NoError(t, err)
 	readBack, err := afero.ReadFile(fs, fileName)
 	assert.NoError(t, err)
-	assert.Equal(t, "ID,Torque,TorqueAD\n51,48,48\n", string(readBack))
-}
-
-func TestValidateProfileTooMany(t *testing.T) {
-	profile := &Profile{}
-	profile.Fields = make(map[ID]Point)
-	for i := 0; i < 100; i++ {
-		profile.Fields[ID(i)] = Point{
-			AD:     0x30,
-			Torque: 0x33,
-		}
-	}
-	err := profile.Validate()
-	assert.EqualError(t, err, fmt.Sprintf("profile should only have %d fields", profileLen))
-}
-
-func TestValidateProfileInvalidID(t *testing.T) {
-	profile := &Profile{
-		Fields: map[ID]Point{
-			0xFF: {
-				Torque: 0x30,
-				AD:     0x30,
-			},
-		},
-	}
-	err := profile.Validate()
-	assert.EqualError(t, err, fmt.Sprintf("invalid profile parameter: 255 should be between %d and %d", idMin, idMax))
+	assert.Equal(t, "ID,Torque,TorqueAD\n1,48,48\n2,0,0\n3,0,0\n4,0,0\n5,0,0\n6,0,0\n7,0,0\n8,0,0\n9,0,0\n10,0,0\n11,0,0\n12,0,0\n13,0,0\n14,0,0\n15,0,0\n16,0,0\n17,0,0\n18,0,0\n19,0,0\n20,0,0\n21,0,0\n22,0,0\n23,0,0\n24,0,0\n", string(readBack))
 }
 
 func TestValidateProfileValid(t *testing.T) {
 	profile := &Profile{
-		Fields: map[ID]Point{
+		Fields: [24]Point{
 			0x00: {
 				Torque: 0x30,
 				AD:     0x30,
@@ -163,36 +139,18 @@ func TestValidateProfileValid(t *testing.T) {
 
 func TestMarshalBytesOrdered(t *testing.T) {
 	profile := &Profile{
-		Fields: map[ID]Point{
-			0x01: {
+		Fields: [24]Point{
+			0: {
 				Torque: 0x0030,
 				AD:     0x00EF,
 			},
-			0x02: {
+			1: {
 				Torque: 0xFFFF,
 				AD:     0xFF00,
 			},
 		},
 	}
-	expected := []uint16{0x0030, 0xFFFF, 0x0030, 0xFF00}
-	result := profile.MarshalBytes()
-	assert.Equal(t, expected, result[0:4])
-}
-
-func TestMarshalBytesUnOrdered(t *testing.T) {
-	profile := &Profile{
-		Fields: map[ID]Point{
-			0x08: {
-				Torque: 0x0030,
-				AD:     0x0030,
-			},
-			0x01: {
-				Torque: 0xFFFF,
-				AD:     0xFF00,
-			},
-		},
-	}
-	expected := []uint16{0x0030, 0xFFFF, 0x0030, 0xFF00}
+	expected := [48]uint16{0: 0x0030, 1: 0xFFFF, 24: 0x00EF, 25: 0xFF00}
 	result := profile.MarshalBytes()
 	assert.Equal(t, expected, result)
 }
