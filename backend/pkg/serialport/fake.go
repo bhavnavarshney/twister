@@ -29,6 +29,9 @@ var responseMap = map[byte][]byte{
 }
 
 func (mp *FakePort) Write(out []byte) (int, error) {
+	if len(out) == 0 {
+		return 0, nil
+	}
 	mp.Log.Println("Writing to mock port")
 	mp.writeLog = append(mp.writeLog, out...)
 	// we always read the second byte to see what to do
@@ -42,7 +45,7 @@ func (mp *FakePort) Read(b []byte) (int, error) {
 	mp.Log.Println("Reading from Mock Port")
 
 	if len(mp.readBuffer) > 0 {
-		mp.Log.Printf("Read %X", mp.readBuffer)
+		mp.Log.Printf("Read HEX: %X", mp.readBuffer)
 		for i := range b {
 			b[i] = mp.readBuffer[i]
 		}

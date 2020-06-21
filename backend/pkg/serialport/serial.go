@@ -3,10 +3,10 @@ package serialport
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
-	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/nibble"
 	"github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
 )
@@ -45,13 +45,17 @@ func (sp *SerialPortDriver) SendMessage(m Message) error {
 		return err
 	}
 
+	bytesReceived := 0
 	buf := make([]byte, m.ResponseLen())
-	numBytesRead, err := sp.read(buf)
-	if err != nil {
-		return err
+	for bytesReceived < m.ResponseLen() {
+		numBytesRead, err := sp.read(buf)
+		sp.Log.Printf("Read %d bytes from port", numBytesRead)
+		sp.Log.Printf("Received response: %d", buf)
+		if err != nil {
+			return fmt.Errorf("error reading from port: %w", err)
+		}
+		bytesReceived += numBytesRead
 	}
-	sp.Log.Printf("Read %d bytes from port", numBytesRead)
-	sp.Log.Printf("Received response: %d", buf)
 
 	// If there's an expected response, check it
 	if len(m.Response()) > 0 && !bytes.Equal(m.Response(), buf) {
@@ -67,15 +71,30 @@ func (sp *SerialPortDriver) SendCommand(m Message) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	time.Sleep(2 * time.Second)
+	// Drop 2 bytes
+	buf := make([]byte, 2)
+	num, _ := sp.read(buf)
+	sp.Log.Println("Dropping %d bytes", num)
 
-	// Check if response length is zero
-	buf := make([]byte, m.ResponseLen())
-	_, err = sp.read(buf)
-	if err != nil {
-		return nil, err
+	bytesReceived := 0
+	var received []byte
+	for bytesReceived < m.ResponseLen() {
+		buf := make([]byte, 300)
+		numBytesRead, err := sp.read(buf)
+		if err != nil {
+			return nil, fmt.Errorf("error reading from port: %w", err)
+		}
+		// Check that we're starting with 0x21
+		if (buf[0] == byte(0x21)) || (len(received) > 0 && (received[0] == byte(0x21))) {
+			bytesReceived += numBytesRead
+			fmt.Println(received)
+			received = append(received, buf[:numBytesRead]...)
+		}
+		fmt.Println("Dropping received")
 	}
 
-	return buf, nil
+	return received, nil
 }
 
 func MakeCommand(dataInfo byte, responseLen int) *Command {
@@ -87,9 +106,11 @@ func MakeCommand(dataInfo byte, responseLen int) *Command {
 	}
 }
 
-func NibbledChecksum(input []byte) [2]byte {
-	hi, low := nibble.Break(message.Checksum(input))
-	return [2]byte{hi, low}
+func NibbledChecksum(dataInfo []byte) [2]byte {
+	var checksum = message.Checksum(dataInfo)
+	var encodedChecksum [2]byte
+	copy(encodedChecksum[:], message.Encode([]byte{checksum}))
+	return encodedChecksum
 }
 
 type Command struct {
@@ -136,19 +157,24 @@ func (sp *SerialPortDriver) SendKeepAlive() bool {
 }
 
 // Wrap write for easier debugging
+// Adds delay
 func (sp *SerialPortDriver) write(out []byte) (int, error) {
 	n, err := sp.Port.Write(out)
-	sp.Log.Debugf("wrote %d bytes", n)
 	if err != nil {
 		sp.Log.Fatal(err)
+		return n, err
 	}
-	return n, err
+	sp.Log.Printf("wrote %d bytes", n)
+	sp.Log.Printf("wrote %X", out)
+
+	return len(out), nil
 }
 
 // Wrap read for easier debugging
 func (sp *SerialPortDriver) read(b []byte) (int, error) {
 	n, err := sp.Port.Read(b)
-	sp.Log.Debugf("read %d bytes", n)
+	sp.Log.Printf("read %d bytes", n)
+	sp.Log.Printf("read %X", b)
 	if err != nil {
 		sp.Log.Fatal(err)
 	}
