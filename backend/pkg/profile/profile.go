@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -20,8 +21,8 @@ type ID byte
 
 // Point represents a torque sensor calibration point for the drill
 type Point struct {
-	AD     byte
-	Torque byte
+	AD     uint16
+	Torque uint16
 }
 
 func SaveProfile(p *Profile, fileName string, fs afero.Fs) error {
@@ -51,6 +52,20 @@ func (p *Profile) Validate() error {
 		}
 	}
 	return nil
+}
+
+func (p *Profile) MarshalBytes() [24 * 2]uint16 {
+	keys := make([]ID, len(p.Fields))
+	for k := range p.Fields {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i int, j int) bool { return keys[i] < keys[j] })
+	var output [24 * 2]uint16
+	for k := range keys {
+		output[int(k)] = p.Fields[ID(k)].Torque
+		output[int(k)+24] = p.Fields[ID(k)].AD
+	}
+	return output
 }
 
 func (p *Profile) MarshalCSV() ([]byte, error) {
@@ -138,19 +153,19 @@ func BuildHeader() []string {
 }
 
 func ParseRow(row []string) (ID, Point, error) {
-	var conv []byte
+	var conv []uint16
 	for _, val := range row {
 		result, err := strconv.Atoi(val)
 		if err != nil {
 			return ID(0x00), Point{}, fmt.Errorf("error parsing profile: %w", err)
 		}
-		conv = append(conv, byte(result))
+		conv = append(conv, uint16(result))
 	}
 
 	return ID(conv[0]), MakePoint(conv[1:]), nil
 }
 
-func MakePoint(row []byte) Point {
+func MakePoint(row []uint16) Point {
 	return Point{
 		AD:     row[0],
 		Torque: row[1],

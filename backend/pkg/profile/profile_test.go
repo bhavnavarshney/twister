@@ -158,3 +158,39 @@ func TestValidateProfileValid(t *testing.T) {
 	err := profile.Validate()
 	assert.NoError(t, err)
 }
+
+func TestMarshalBytesOrdered(t *testing.T) {
+	profile := &Profile{
+		Fields: map[ID]Point{
+			0x01: {
+				Torque: 0x0030,
+				AD:     0x00EF,
+			},
+			0x02: {
+				Torque: 0xFFFF,
+				AD:     0xFF00,
+			},
+		},
+	}
+	expected := []uint16{0x0030, 0xFFFF, 0x0030, 0xFF00}
+	result := profile.MarshalBytes()
+	assert.Equal(t, expected, result[0:4])
+}
+
+func TestMarshalBytesUnOrdered(t *testing.T) {
+	profile := &Profile{
+		Fields: map[ID]Point{
+			0x08: {
+				Torque: 0x0030,
+				AD:     0x0030,
+			},
+			0x01: {
+				Torque: 0xFFFF,
+				AD:     0xFF00,
+			},
+		},
+	}
+	expected := []uint16{0x0030, 0xFFFF, 0x0030, 0xFF00}
+	result := profile.MarshalBytes()
+	assert.Equal(t, expected, result)
+}
