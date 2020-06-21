@@ -62,13 +62,12 @@ func (td *TorqueData) ResponseLen() int {
 func (td *TorqueData) Unmarshal(input []byte) error {
 	td.header = input[0]
 	td.dataInfo = input[1]
-	td.checksum = input[len(input)-1]
 	data, err := Decode(input[2:])
 	if err != nil {
 		return err
 	}
 	copy(td.message[:], data)
-	fmt.Println(data)
+	fmt.Printf("%X", data)
 	td.checksum = data[len(data)-1]
 	return td.isValidChecksum()
 }
