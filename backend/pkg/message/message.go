@@ -19,6 +19,11 @@ const (
 	BulkParamReceiveMsg = 0x15
 )
 
+const (
+	DrillIDMsgLen   = 16
+	DrillTypeMsgLen = 20
+)
+
 func MakeTorqueData(message [24 * 4]byte) *TorqueData {
 	return &TorqueData{
 		header:   HeaderByte,

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -24,7 +23,7 @@ func main() {
 				Aliases: []string{"r"},
 				Usage:   "reads the torque profile from the drill",
 				Action: func(c *cli.Context) error {
-					return CmdRead(c)
+					return Read(c)
 				},
 			},
 			{
@@ -83,20 +82,12 @@ func main() {
 
 func CmdSerialNum(c *cli.Context) error {
 	log := logrus.New()
-	var p serialport.Port
-	var err error
 	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-
-	if c.Bool("mock") {
-		log.Println("Starting in MOCK mode")
-		p, err = serialport.MakeFakePort(config)
-	} else {
-		p, err = serial.OpenPort(config)
-	}
+	p := serialport.MakeSerialPort(config, c.Bool("mock"))
 	defer p.Close()
 	d := serialport.MakeSerialPortDriver(p, log)
 
-	drillIDCommand := serialport.MakeCommand(0x05, 16)
+	drillIDCommand := serialport.MakeCommand(message.DrillIDMsg, message.DrillIDMsgLen)
 	response, err := d.SendCommand(drillIDCommand)
 	if err != nil {
 		return err
@@ -122,7 +113,7 @@ func CmdInfo(c *cli.Context) error {
 	}
 	d := serialport.MakeSerialPortDriver(p, log)
 
-	drillTypeCommand := serialport.MakeCommand(0x04, 20)
+	drillTypeCommand := serialport.MakeCommand(message.DrillTypeMsg, message.DrillTypeMsgLen)
 	response, err := d.SendCommand(drillTypeCommand)
 	if err != nil {
 		return err
@@ -133,36 +124,6 @@ func CmdInfo(c *cli.Context) error {
 	log.Printf("Response Hex: %X", drillType.ToByte())
 	log.Printf("Response ASCII: %s", drillType.ToString())
 
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func CmdRead(c *cli.Context) error {
-	log := logrus.New()
-	var p serialport.Port
-	var err error
-	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-
-	if c.Bool("mock") {
-		log.Println("Starting in MOCK mode")
-		p, err = serialport.MakeFakePort(config)
-	} else {
-		p, err = serial.OpenPort(config)
-	}
-	defer p.Close()
-	d := serialport.MakeSerialPortDriver(p, log)
-
-	drillTypeCommand := serialport.MakeCommand(message.BulkParamReceiveMsg, 20)
-	response, err := d.SendCommand(drillTypeCommand)
-	if err != nil {
-		return err
-	}
-
-	torqueData := message.TorqueData{}
-	err = torqueData.Unmarshal(response)
-	fmt.Println(response)
 	if err != nil {
 		return err
 	}

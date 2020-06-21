@@ -4,12 +4,28 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
 	"github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
 )
+
+func MakeSerialPort(config *serial.Config, isFake bool) Port {
+	var p Port
+	var err error
+	if isFake {
+		log.Println("Starting in MOCK mode")
+		p, err = MakeFakePort(config)
+	} else {
+		p, err = serial.OpenPort(config)
+	}
+	if err != nil {
+		panic(err)
+	}
+	return p
+}
 
 func MakeSerialPortDriver(p Port, log *logrus.Logger) *SerialPortDriver {
 	return &SerialPortDriver{
@@ -75,7 +91,7 @@ func (sp *SerialPortDriver) SendCommand(m Message) ([]byte, error) {
 	// Drop 2 bytes
 	buf := make([]byte, 2)
 	num, _ := sp.read(buf)
-	sp.Log.Println("Dropping %d bytes", num)
+	sp.Log.Printf("Dropping %d bytes", num)
 
 	bytesReceived := 0
 	var received []byte
