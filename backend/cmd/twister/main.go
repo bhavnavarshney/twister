@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -39,7 +40,7 @@ func main() {
 				Aliases: []string{"i"},
 				Usage:   "add a task to the list",
 				Action: func(ctx *cli.Context) error {
-					return CmdInfo(ctx)
+					return CmdSerialNum(ctx)
 				},
 			},
 		},
@@ -80,6 +81,38 @@ func main() {
 	}
 }
 
+func CmdSerialNum(c *cli.Context) error {
+	log := logrus.New()
+	var p serialport.Port
+	var err error
+	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
+
+	if c.Bool("mock") {
+		log.Println("Starting in MOCK mode")
+		p, err = serialport.MakeFakePort(config)
+	} else {
+		p, err = serial.OpenPort(config)
+	}
+	defer p.Close()
+	d := serialport.MakeSerialPortDriver(p, log)
+
+	drillIDCommand := serialport.MakeCommand(0x05, 16)
+	response, err := d.SendCommand(drillIDCommand)
+	if err != nil {
+		return err
+	}
+
+	drillID := message.DrillID{}
+	err = drillID.Unmarshal(response)
+	log.Printf("Response Hex: %X", drillID.ToByte())
+	log.Printf("Response ASCII: %s", drillID.ToString())
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func CmdInfo(c *cli.Context) error {
 	log := logrus.New()
 	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
@@ -99,6 +132,7 @@ func CmdInfo(c *cli.Context) error {
 	err = drillType.Unmarshal(response)
 	log.Printf("Response Hex: %X", drillType.ToByte())
 	log.Printf("Response ASCII: %s", drillType.ToString())
+
 	if err != nil {
 		return err
 	}
@@ -107,11 +141,17 @@ func CmdInfo(c *cli.Context) error {
 
 func CmdRead(c *cli.Context) error {
 	log := logrus.New()
+	var p serialport.Port
+	var err error
 	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-	p, err := serialport.MakeFakePort(config)
-	if err != nil {
-		return err
+
+	if c.Bool("mock") {
+		log.Println("Starting in MOCK mode")
+		p, err = serialport.MakeFakePort(config)
+	} else {
+		p, err = serial.OpenPort(config)
 	}
+	defer p.Close()
 	d := serialport.MakeSerialPortDriver(p, log)
 
 	drillTypeCommand := serialport.MakeCommand(message.BulkParamReceiveMsg, 20)
@@ -120,10 +160,9 @@ func CmdRead(c *cli.Context) error {
 		return err
 	}
 
-	drillType := message.DrillType{}
-	err = drillType.Unmarshal(response)
-	log.Printf("Response Hex: %X", drillType.ToByte())
-	log.Printf("Response ASCII: %s", drillType.ToString())
+	torqueData := message.TorqueData{}
+	err = torqueData.Unmarshal(response)
+	fmt.Println(response)
 	if err != nil {
 		return err
 	}
@@ -132,11 +171,21 @@ func CmdRead(c *cli.Context) error {
 
 func CmdWrite(c *cli.Context) error {
 	log := logrus.New()
+	var p serialport.Port
+	var err error
 	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-	p, err := serialport.MakeFakePort(config)
+
+	if c.Bool("mock") {
+		log.Println("Starting in MOCK mode")
+		p, err = serialport.MakeFakePort(config)
+	} else {
+		p, err = serial.OpenPort(config)
+	}
+
 	if err != nil {
 		return err
 	}
+	defer p.Close()
 	d := serialport.MakeSerialPortDriver(p, log)
 	data := new([24 * 4]byte)
 	torqueData := message.MakeTorqueData(*data)
