@@ -88,26 +88,24 @@ func (sp *SerialPortDriver) SendCommand(m Message) ([]byte, error) {
 		return nil, err
 	}
 	time.Sleep(2 * time.Second)
-	// Drop 2 bytes
-	buf := make([]byte, 2)
-	num, _ := sp.read(buf)
-	sp.Log.Printf("Dropping %d bytes", num)
 
 	bytesReceived := 0
 	var received []byte
 	for bytesReceived < m.ResponseLen() {
-		buf := make([]byte, 300)
+		fmt.Printf("reading %d bytes out of %d expected", bytesReceived, m.ResponseLen())
+		buf := make([]byte, m.ResponseLen())
 		numBytesRead, err := sp.read(buf)
+		fmt.Printf("reading %d bytes", numBytesRead)
 		if err != nil {
 			return nil, fmt.Errorf("error reading from port: %w", err)
 		}
 		// Check that we're starting with 0x21
-		if (buf[0] == byte(0x21)) || (len(received) > 0 && (received[0] == byte(0x21))) {
-			bytesReceived += numBytesRead
-			fmt.Println(received)
-			received = append(received, buf[:numBytesRead]...)
-		}
-		fmt.Println("Dropping received")
+		//if (buf[0] == byte(0x21)) || (len(received) > 0 && (received[0] == byte(0x21))) {
+		fmt.Println("Header detected")
+		bytesReceived += numBytesRead
+		fmt.Println(received)
+		received = append(received, buf[:numBytesRead]...)
+		//}
 	}
 
 	return received, nil

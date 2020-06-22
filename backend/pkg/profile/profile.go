@@ -36,6 +36,17 @@ func SaveProfile(p *Profile, fileName string, fs afero.Fs) error {
 	return nil
 }
 
+func MakeProfile(params [24 * 2]uint16) *Profile {
+	profile := &Profile{}
+	for i := range profile.Fields {
+		profile.Fields[i] = Point{
+			Torque: params[i],
+			AD:     params[i+24],
+		}
+	}
+	return profile
+}
+
 // Profile contains a set of calibration points for the drill
 type Profile struct {
 	Fields [24]Point
