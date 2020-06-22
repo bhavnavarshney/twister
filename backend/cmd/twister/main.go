@@ -4,10 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
-	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/serialport"
-	"github.com/sirupsen/logrus"
-	"github.com/tarm/serial"
 	"github.com/urfave/cli/v2"
 )
 
@@ -31,7 +27,7 @@ func main() {
 				Aliases: []string{"w"},
 				Usage:   "writes the torque profile to the drill",
 				Action: func(c *cli.Context) error {
-					return CmdWrite(c)
+					return Write(c)
 				},
 			},
 			{
@@ -78,82 +74,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func CmdSerialNum(c *cli.Context) error {
-	log := logrus.New()
-	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-	p := serialport.MakeSerialPort(config, c.Bool("mock"))
-	defer p.Close()
-	d := serialport.MakeSerialPortDriver(p, log)
-
-	drillIDCommand := serialport.MakeCommand(message.DrillIDMsg, message.DrillIDMsgLen)
-	response, err := d.SendCommand(drillIDCommand)
-	if err != nil {
-		return err
-	}
-
-	drillID := message.DrillID{}
-	err = drillID.Unmarshal(response)
-	log.Printf("Response Hex: %X", drillID.ToByte())
-	log.Printf("Response ASCII: %s", drillID.ToString())
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func CmdInfo(c *cli.Context) error {
-	log := logrus.New()
-	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-	p, err := serialport.MakeFakePort(config)
-	if err != nil {
-		return err
-	}
-	d := serialport.MakeSerialPortDriver(p, log)
-
-	drillTypeCommand := serialport.MakeCommand(message.DrillTypeMsg, message.DrillTypeMsgLen)
-	response, err := d.SendCommand(drillTypeCommand)
-	if err != nil {
-		return err
-	}
-
-	drillType := message.DrillType{}
-	err = drillType.Unmarshal(response)
-	log.Printf("Response Hex: %X", drillType.ToByte())
-	log.Printf("Response ASCII: %s", drillType.ToString())
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func CmdWrite(c *cli.Context) error {
-	log := logrus.New()
-	var p serialport.Port
-	var err error
-	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-
-	if c.Bool("mock") {
-		log.Println("Starting in MOCK mode")
-		p, err = serialport.MakeFakePort(config)
-	} else {
-		p, err = serial.OpenPort(config)
-	}
-
-	if err != nil {
-		return err
-	}
-	defer p.Close()
-	d := serialport.MakeSerialPortDriver(p, log)
-	data := new([24 * 4]byte)
-	torqueData := message.MakeTorqueData(*data)
-	err = d.SendMessage(torqueData)
-	if err != nil {
-		return err
-	}
-	log.Printf("Successfully Sent Hex: %X", data)
-	return nil
 }
