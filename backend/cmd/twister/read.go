@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
+	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/profile"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/serialport"
 	"github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
@@ -12,30 +13,27 @@ import (
 
 func Read(c *cli.Context) error {
 	log := logrus.New()
-	var p serialport.Port
-	var err error
 	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-
-	if c.Bool("mock") {
-		log.Println("Starting in MOCK mode")
-		p, err = serialport.MakeFakePort(config)
-	} else {
-		p, err = serial.OpenPort(config)
-	}
+	p := serialport.MakeSerialPort(config, c.Bool("mock"))
 	defer p.Close()
 	d := serialport.MakeSerialPortDriver(p, log)
 
-	drillTypeCommand := serialport.MakeCommand(message.BulkParamReceiveMsg, 20)
-	response, err := d.SendCommand(drillTypeCommand)
+	readProfileCommand := serialport.MakeCommand(message.BulkParamReceiveMsg, message.BulkParamReceiveMsgLen)
+	response, err := d.SendCommand(readProfileCommand)
 	if err != nil {
 		return err
 	}
 
 	torqueData := message.TorqueData{}
 	err = torqueData.Unmarshal(response)
-	fmt.Println(response)
 	if err != nil {
 		return err
 	}
+	int16Data := message.ToUInt16(torqueData.ToByte())
+	fmt.Printf("Torque Int16 Data: %d\n", int16Data)
+	var profileArr [48]uint16
+	copy(profileArr[:], int16Data)
+	profile := profile.MakeProfile(profileArr)
+	fmt.Println(profile)
 	return nil
 }

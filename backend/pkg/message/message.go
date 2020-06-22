@@ -20,8 +20,9 @@ const (
 )
 
 const (
-	DrillIDMsgLen   = 16
-	DrillTypeMsgLen = 20
+	DrillIDMsgLen          = 16
+	DrillTypeMsgLen        = 20
+	BulkParamReceiveMsgLen = 24*4*2 + 4
 )
 
 func MakeTorqueData(message [24 * 4]byte) *TorqueData {
@@ -72,7 +73,6 @@ func (td *TorqueData) Unmarshal(input []byte) error {
 		return err
 	}
 	copy(td.message[:], data)
-	fmt.Printf("%X", data)
 	td.checksum = data[len(data)-1]
 	return td.isValidChecksum()
 }
@@ -86,6 +86,10 @@ func (t *TorqueData) isValidChecksum() error {
 }
 
 func (t *TorqueData) ToByte() []byte {
+	return t.message[:]
+}
+
+func (t *TorqueData) ToProfile() []byte {
 	return t.message[:]
 }
 

@@ -10,25 +10,13 @@ import (
 
 func Write(c *cli.Context) error {
 	log := logrus.New()
-	var p serialport.Port
-	var err error
 	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-
-	if c.Bool("mock") {
-		log.Println("Starting in MOCK mode")
-		p, err = serialport.MakeFakePort(config)
-	} else {
-		p, err = serial.OpenPort(config)
-	}
-
-	if err != nil {
-		return err
-	}
+	p := serialport.MakeSerialPort(config, c.Bool("mock"))
 	defer p.Close()
 	d := serialport.MakeSerialPortDriver(p, log)
 	data := new([24 * 4]byte)
 	torqueData := message.MakeTorqueData(*data)
-	err = d.SendMessage(torqueData)
+	err := d.SendMessage(torqueData)
 	if err != nil {
 		return err
 	}
