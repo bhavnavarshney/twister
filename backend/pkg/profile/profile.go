@@ -49,7 +49,7 @@ func MakeProfile(params [24 * 2]uint16) *Profile {
 
 // Profile contains a set of calibration points for the drill
 type Profile struct {
-	Fields [24]Point
+	Fields [24]Point `json:"Fields"`
 }
 
 func (p *Profile) Validate() error {

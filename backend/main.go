@@ -12,7 +12,7 @@ import (
 	"github.com/wailsapp/wails"
 )
 
-func basic() string {
+func basic() profile.Profile {
 	log := logrus.New()
 	config := &serial.Config{Name: "/dev/tty.usbserial-AC019QP9", Baud: 9600}
 	mock := true
@@ -36,7 +36,7 @@ func basic() string {
 	var profileArr [48]uint16
 	copy(profileArr[:], int16Data)
 	profile := profile.MakeProfile(profileArr)
-	return fmt.Sprintln(profile)
+	return *profile
 }
 
 func main() {
