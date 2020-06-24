@@ -2,6 +2,8 @@ import React, { forwardRef } from "react";
 import Modal from "react-modal";
 import MaterialTable from "material-table";
 import { makeStyles } from "@material-ui/core/styles";
+import TextField from "@material-ui/core/TextField";
+import NumberFormat from "react-number-format";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
@@ -34,8 +36,36 @@ class HelloWorld extends React.Component {
       showModal: false,
       columns: [
         { title: "ID", field: "ID", type: "numeric", editable: "never" },
-        { title: "Torque", field: "Torque", type: "numeric" },
-        { title: "AD", field: "AD", type: "numeric" },
+        {
+          title: "Torque",
+          field: "Torque",
+          type: "numeric",
+          editComponent: (props) => {
+            return (
+              <TextField
+                value={props.value}
+                type="number"
+                onChange={(e) => props.onChange(e.target.value)}
+                inputProps={{ min: "0", max: "65535", step: "1" }}
+              />
+            );
+          },
+        },
+        {
+          title: "AD",
+          field: "AD",
+          type: "numeric",
+          editComponent: (props) => {
+            return (
+              <TextField
+                value={props.value}
+                type="number"
+                onChange={(e) => props.onChange(e.target.value)}
+                inputProps={{ min: "0", max: "65535", step: "1" }}
+              />
+            );
+          },
+        },
       ],
       data: [
         { ID: 1, Torque: 15, AD: 15 },
