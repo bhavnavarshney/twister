@@ -134,10 +134,6 @@ class HelloWorld extends React.Component {
     console.log(result);
     return (
       <div className="App">
-        <button onClick={this.handleOpenModal} type="button">
-          Hello
-        </button>
-
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <Grid item xs={12}>
@@ -147,23 +143,13 @@ class HelloWorld extends React.Component {
             <Paper>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <Button variant="contained" color="primary">
-                    Open
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button variant="contained" color="primary">
+                  <Button onClick={this.handleOpenModal} variant="contained" color="primary">
                     Read
                   </Button>
                 </Grid>
                 <Grid item xs={12}>
                   <Button variant="contained" color="primary">
-                    Send
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button variant="contained" color="secondary">
-                    Close
+                    Write
                   </Button>
                 </Grid>
               </Grid>
