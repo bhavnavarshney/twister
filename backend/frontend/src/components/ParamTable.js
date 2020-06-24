@@ -13,7 +13,7 @@ const tableIcons = {
     Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
   };
 
-export default function ParamTable() {
+export default function ParamTable(props) {
     const [state, setState] = React.useState({
         columns: [
             { title: "ID", field: "ID", type: "numeric", editable: "never" },
@@ -76,23 +76,11 @@ return (<Paper>
       localization={{ pagination: { labelRowsPerPage: "12" } }}
       title="Editable Example"
       columns={state.columns}
-      data={state.data}
+      data={props.params}
       editable={{
         isEditable: (rowData) => rowData.name !== "ID",
         isDeleteHidden: (rowData) => true,
-        onRowUpdate: (newData, oldData) =>
-          new Promise((resolve) => {
-            setTimeout(() => {
-              resolve();
-              if (oldData) {
-                setState((prevState) => {
-                    const data = [...prevState.data];
-                    data[data.indexOf(oldData)] = newData;
-                    return { ...prevState, data };
-                  });
-              }
-            }, 600);
-          }),
+        onRowUpdate: props.handleRowUpdate,
       }}
     />
   </Paper>);
