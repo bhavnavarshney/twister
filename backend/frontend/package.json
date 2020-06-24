@@ -12,6 +12,7 @@
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-modal": "3.11.2",
+    "react-number-format": "^4.4.1",
     "wails-react-scripts": "3.0.1-2"
   },
   "scripts": {
