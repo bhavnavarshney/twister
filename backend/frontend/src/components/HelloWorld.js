@@ -236,15 +236,6 @@ class HelloWorld extends React.Component {
                 data={this.state.dataCCW}
                 editable={{
                   isDeleteHidden: (rowData) => true,
-                  onRowAdd: (newData) =>
-                    new Promise((resolve) => {
-                      setTimeout(() => {
-                        resolve();
-                        const data = [...this.state.data];
-                        data.push(newData);
-                        this.setState({ ...this.state, data });
-                      }, 600);
-                    }),
                   onRowUpdate: (newData, oldData) =>
                     new Promise((resolve) => {
                       setTimeout(() => {
@@ -254,15 +245,6 @@ class HelloWorld extends React.Component {
                           data[data.indexOf(oldData)] = newData;
                           this.setState({ ...this.state, data });
                         }
-                      }, 600);
-                    }),
-                  onRowDelete: (oldData) =>
-                    new Promise((resolve) => {
-                      setTimeout(() => {
-                        resolve();
-                        const data = [...this.state.data];
-                        data.splice(data.indexOf(oldData), 1);
-                        this.setState({ ...this.state, data });
                       }, 600);
                     }),
                 }}
