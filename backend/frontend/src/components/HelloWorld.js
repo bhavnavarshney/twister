@@ -137,37 +137,39 @@ class HelloWorld extends React.Component {
         <button onClick={this.handleOpenModal} type="button">
           Hello
         </button>
-        
 
         <Grid container spacing={3}>
           <Grid item xs={3}>
-          <Paper>
-          <Grid container spacing={3}>
-         
-          <Grid item xs={12}>
-            <Button variant="contained" color="primary">
-              Open
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Button variant="contained" color="primary">
-              Read
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Button variant="contained" color="primary">
-              Send
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Button variant="contained" color="secondary">
-              Close
-            </Button>
-          </Grid>
-         
-        </Grid>
-        </Paper>
+            <Grid item xs={12}>
+              <InfoCard/>
             </Grid>
+            <Grid item xs = {12}>
+            <Paper>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Button variant="contained" color="primary">
+                    Open
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button variant="contained" color="primary">
+                    Read
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button variant="contained" color="primary">
+                    Send
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button variant="contained" color="secondary">
+                    Close
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
+            </Grid>
+          </Grid>
           <Grid item xs={3}>
             <Paper>
               <MaterialTable
