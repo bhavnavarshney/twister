@@ -16,29 +16,12 @@ function mapFieldsToProfile(fields) {
 }
 
 export default function HelloWorld() {
-  const [state, setState] = React.useState({
-    dataCCW: [
-      { ID: 13, Torque: 15, AD: 15 },
-      { ID: 14, Torque: 15, AD: 15 },
-      { ID: 15, Torque: 15, AD: 15 },
-      { ID: 16, Torque: 15, AD: 15 },
-      { ID: 17, Torque: 15, AD: 15 },
-      { ID: 18, Torque: 15, AD: 15 },
-      { ID: 19, Torque: 15, AD: 15 },
-      { ID: 20, Torque: 15, AD: 15 },
-      { ID: 21, Torque: 15, AD: 15 },
-      { ID: 22, Torque: 15, AD: 15 },
-      { ID: 23, Torque: 15, AD: 15 },
-      { ID: 24, Torque: 15, AD: 15 },
-    ],
-    profile: [],
-  });
+  const [profile, setProfile] = React.useState([]);
 
   const handleOpenModal = () => {
     window.backend.basic().then((result) => {
-      var newState = {...state};
-      newState.profile = mapFieldsToProfile(result.Fields);
-      setState(newState);
+      const newProfile = mapFieldsToProfile(result.Fields);
+      setProfile(newProfile);
     });
   };
 
@@ -47,9 +30,9 @@ export default function HelloWorld() {
       setTimeout(() => {
         resolve();
         if (oldData) {
-          const data = [...state.profile];
+          const data = [...profile];
           data[data.indexOf(oldData)] = newData;
-          setState({...state, data});
+          setProfile(data);
         }
       }, 600);
     });
@@ -85,13 +68,13 @@ export default function HelloWorld() {
         <Grid item xs={3}>
           <ParamTable
             id="unique"
-            params={state.profile}
+            params={profile}
             handleRowUpdate={rowUpdateHandler}
           />
         </Grid>
         <Grid item xs={3}>
           <ParamTable
-            params={state.profile}
+            params={profile}
             handleRowUpdate={rowUpdateHandler}
           />
         </Grid>
