@@ -15,13 +15,28 @@ function mapFieldsToProfile(fields) {
   });
 }
 
+function cleanFormat(rowData) {
+  return {
+    ID: rowData.ID,
+    AD: parseInt(rowData.AD),
+    Torque: parseInt(rowData.Torque)
+  }
+}
+
 export default function HelloWorld() {
   const [profile, setProfile] = React.useState([]);
 
-  const handleOpenModal = () => {
-    window.backend.basic().then((result) => {
+  const handleRead = () => {
+    window.backend.Drill.GetProfile().then((result) => {
       const newProfile = mapFieldsToProfile(result.Fields);
       setProfile(newProfile);
+    });
+  };
+
+  const handleWrite = () => {
+    const cleanProfile = profile.map(row=>cleanFormat(row))
+    window.backend.Drill.WriteProfile(cleanProfile).then((result) => {
+      console.log(result)
     });
   };
 
@@ -30,8 +45,9 @@ export default function HelloWorld() {
       setTimeout(() => {
         resolve();
         if (oldData) {
-          const data = [...profile];
-          data[data.indexOf(oldData)] = newData;
+          const data = [...profile];          
+          data[data.indexOf(oldData)] = cleanFormat(newData);
+          console.log(cleanFormat(newData))
           setProfile(data);
         }
       }, 600);
@@ -50,7 +66,7 @@ export default function HelloWorld() {
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <Button
-                    onClick={handleOpenModal}
+                    onClick={handleRead}
                     variant="contained"
                     color="primary"
                   >
@@ -58,7 +74,7 @@ export default function HelloWorld() {
                   </Button>
                 </Grid>
                 <Grid item xs={12}>
-                  <Button variant="contained" color="primary">
+                  <Button onClick={handleWrite} variant="contained" color="primary">
                     Write
                   </Button>
                 </Grid>

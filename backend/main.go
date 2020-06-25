@@ -12,7 +12,12 @@ import (
 	"github.com/wailsapp/wails"
 )
 
-func basic() profile.Profile {
+type Drill struct {
+	profile profile.Profile
+	info    string
+}
+
+func (dr *Drill) GetProfile() profile.Profile {
 	log := logrus.New()
 	config := &serial.Config{Name: "/dev/tty.usbserial-AC019QP9", Baud: 9600}
 	mock := true
@@ -39,6 +44,16 @@ func basic() profile.Profile {
 	return *profile
 }
 
+func (dr *Drill) WriteProfile(p []interface{}) error {
+	fmt.Println(p)
+	for i := range p {
+		dr.profile.Fields[i].Torque = uint16(p[i].(map[string]interface{})["Torque"].(float64))
+		dr.profile.Fields[i].AD = uint16(p[i].(map[string]interface{})["AD"].(float64))
+	}
+	fmt.Println(dr.profile.Fields)
+	return nil
+}
+
 func main() {
 
 	js := mewn.String("./frontend/build/static/js/main.js")
@@ -52,6 +67,6 @@ func main() {
 		CSS:    css,
 		Colour: "#131313",
 	})
-	app.Bind(basic)
+	app.Bind(&Drill{})
 	app.Run()
 }
