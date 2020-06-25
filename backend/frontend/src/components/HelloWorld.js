@@ -41,6 +41,7 @@ export default function HelloWorld() {
     <div className="App">
       <Grid container spacing={3}>
         <Grid item xs={3}>
+          <Grid container spacing={3}>
           <Grid item xs={12}>
             <InfoCard />
           </Grid>
@@ -64,17 +65,18 @@ export default function HelloWorld() {
               </Grid>
             </Paper>
           </Grid>
+          </Grid>
         </Grid>
         <Grid item xs={3}>
           <ParamTable
             id="unique"
-            params={profile}
+            params={profile.slice(0,12)}
             handleRowUpdate={rowUpdateHandler}
           />
         </Grid>
         <Grid item xs={3}>
           <ParamTable
-            params={profile}
+            params={profile.slice(12,24)}
             handleRowUpdate={rowUpdateHandler}
           />
         </Grid>
