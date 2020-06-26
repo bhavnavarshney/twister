@@ -1,9 +1,12 @@
 lint:
 	golangci-lint run ./...
 test: # Runs unit tests
-	go test -tags=unit ./...
+	go test -tags=unit 
 test-integration:
 	go test -tags=integration ./...
+cover:
+	go test -tags=unit -coverprofile cp.out ./...
+	go tool cover -html=cp.out
 build:
 	rm -rf dist
 	mkdir dist
