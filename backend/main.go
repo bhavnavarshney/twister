@@ -20,7 +20,7 @@ type Drill struct {
 	info             string
 }
 
-func (Drill) GetInfo() string {
+func (dr *Drill) GetInfo() string {
 	// ID
 	// Type
 	// Current Offset
