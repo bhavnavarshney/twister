@@ -36,24 +36,10 @@ func MakeDriver(p Port, log *logrus.Logger) *Driver {
 
 // Driver handles communications to the drill
 type Driver struct {
-	Config        *serial.Config
-	Port          Port
-	MessageBuffer []Message
-	Log           *logrus.Logger
+	Config *serial.Config
+	Port   Port
+	Log    *logrus.Logger
 }
-
-// func (sp *SerialPortDriver) Send(m Message) {
-// 	sp.MessageBuffer = append(sp.MessageBuffer, m)
-// }
-
-// func (sp *SerialPortDriver) Run() {
-// 	for {
-// 		err := sp.SendMessage(sp.MessageBuffer[0])
-// 		if err != nil {
-// 			sp.Log.Printf("Error sending message")
-// 		}
-// 	}
-// }
 
 func (sp *Driver) SendMessage(m Message) error {
 	_, err := sp.write(m.Marshal())
