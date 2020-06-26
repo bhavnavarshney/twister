@@ -27,15 +27,15 @@ func MakeSerialPort(config *serial.Config, isFake bool) Port {
 	return p
 }
 
-func MakeSerialPortDriver(p Port, log *logrus.Logger) *SerialPortDriver {
-	return &SerialPortDriver{
+func MakeDriver(p Port, log *logrus.Logger) *Driver {
+	return &Driver{
 		Port: p,
 		Log:  log,
 	}
 }
 
-// SerialPortDriver handles communications to the drill
-type SerialPortDriver struct {
+// Driver handles communications to the drill
+type Driver struct {
 	Config        *serial.Config
 	Port          Port
 	MessageBuffer []Message
@@ -55,7 +55,7 @@ type SerialPortDriver struct {
 // 	}
 // }
 
-func (sp *SerialPortDriver) SendMessage(m Message) error {
+func (sp *Driver) SendMessage(m Message) error {
 	_, err := sp.write(m.Marshal())
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func (sp *SerialPortDriver) SendMessage(m Message) error {
 	return nil
 }
 
-func (sp *SerialPortDriver) SendCommand(m Message) ([]byte, error) {
+func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 	_, err := sp.write(m.Marshal())
 	if err != nil {
 		return nil, err
@@ -157,7 +157,7 @@ func (k *Command) Timeout() time.Duration {
 
 const KeepAlive = 0x07
 
-func (sp *SerialPortDriver) SendKeepAlive() bool {
+func (sp *Driver) SendKeepAlive() bool {
 	_, err := sp.write([]byte{KeepAlive})
 	if err != nil {
 		return false
@@ -172,7 +172,7 @@ func (sp *SerialPortDriver) SendKeepAlive() bool {
 
 // Wrap write for easier debugging
 // Adds delay
-func (sp *SerialPortDriver) write(out []byte) (int, error) {
+func (sp *Driver) write(out []byte) (int, error) {
 	n, err := sp.Port.Write(out)
 	if err != nil {
 		sp.Log.Fatal(err)
@@ -185,7 +185,7 @@ func (sp *SerialPortDriver) write(out []byte) (int, error) {
 }
 
 // Wrap read for easier debugging
-func (sp *SerialPortDriver) read(b []byte) (int, error) {
+func (sp *Driver) read(b []byte) (int, error) {
 	n, err := sp.Port.Read(b)
 	sp.Log.Printf("read %d bytes", n)
 	sp.Log.Printf("read %X", b)

@@ -15,7 +15,7 @@ func CmdInfo(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	d := serialport.MakeSerialPortDriver(p, log)
+	d := serialport.MakeDriver(p, log)
 
 	drillTypeCommand := serialport.MakeCommand(message.DrillTypeMsg, message.DrillTypeMsgLen)
 	response, err := d.SendCommand(drillTypeCommand)

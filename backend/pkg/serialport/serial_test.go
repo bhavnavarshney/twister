@@ -10,15 +10,15 @@ import (
 	"github.com/tarm/serial"
 )
 
-func TestOpenSerialPort(t *testing.T) {
-	log := logrus.New()
-	c := &serial.Config{Name: "COM3", Baud: 9600}
-	p, err := MakeFakePort(c)
-	assert.NoError(t, err)
-	d := MakeSerialPortDriver(p, log)
-	retVal := d.SendKeepAlive()
-	assert.True(t, retVal)
-}
+// func TestOpenSerialPort(t *testing.T) {
+// 	log := logrus.New()
+// 	c := &serial.Config{Name: "COM3", Baud: 9600}
+// 	p, err := MakeFakePort(c)
+// 	assert.NoError(t, err)
+// 	d := MakeDriver(p, log)
+// 	retVal := d.SendKeepAlive()
+// 	assert.True(t, retVal)
+// }
 
 func TestSendMessage(t *testing.T) {
 	log := logrus.New()
@@ -26,7 +26,7 @@ func TestSendMessage(t *testing.T) {
 	c := &serial.Config{Name: "COM3", Baud: 9600}
 	p, err := MakeFakePort(c)
 	assert.NoError(t, err)
-	d := MakeSerialPortDriver(p, log)
+	d := MakeDriver(p, log)
 	err = d.SendMessage(message)
 	assert.NoError(t, err)
 }
@@ -37,7 +37,7 @@ func TestSendCommand(t *testing.T) {
 	c := &serial.Config{Name: "COM3", Baud: 9600}
 	p, err := MakeFakePort(c)
 	assert.NoError(t, err)
-	d := MakeSerialPortDriver(p, log)
+	d := MakeDriver(p, log)
 	response, err := d.SendCommand(message)
 	assert.NoError(t, err)
 	t.Log(response)

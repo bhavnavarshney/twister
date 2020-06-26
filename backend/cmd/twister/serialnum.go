@@ -13,7 +13,7 @@ func CmdSerialNum(c *cli.Context) error {
 	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
 	p := serialport.MakeSerialPort(config, c.Bool("mock"))
 	defer p.Close()
-	d := serialport.MakeSerialPortDriver(p, log)
+	d := serialport.MakeDriver(p, log)
 
 	drillIDCommand := serialport.MakeCommand(message.DrillIDMsg, message.DrillIDMsgLen)
 	response, err := d.SendCommand(drillIDCommand)
