@@ -13,20 +13,24 @@ import (
 )
 
 type Drill struct {
-	profile profile.Profile
-	info    string
+	driver           *serialport.Driver
+	profile          profile.Profile
+	calibratedOffset uint16
+	currentOffset    uint16
+	info             string
+}
+
+func (Drill) GetInfo() string {
+	// ID
+	// Type
+	// Current Offset
+	// Calibrated Offset
+	return ""
 }
 
 func (dr *Drill) GetProfile() profile.Profile {
-	log := logrus.New()
-	config := &serial.Config{Name: "/dev/tty.usbserial-AC019QP9", Baud: 9600}
-	mock := true
-	p := serialport.MakeSerialPort(config, mock)
-	defer p.Close()
-	d := serialport.MakeSerialPortDriver(p, log)
-
 	readProfileCommand := serialport.MakeCommand(message.BulkParamReceiveMsg, message.BulkParamReceiveMsgLen)
-	response, err := d.SendCommand(readProfileCommand)
+	response, err := dr.driver.SendCommand(readProfileCommand)
 	if err != nil {
 		panic(err)
 	}
@@ -44,21 +48,26 @@ func (dr *Drill) GetProfile() profile.Profile {
 	return *profile
 }
 
-func (dr *Drill) WriteProfile(p []interface{}) error {
-	fmt.Println(p)
+func (dr *Drill) WriteProfile(p []interface{}) (string, error) {
 	for i := range p {
 		dr.profile.Fields[i].Torque = uint16(p[i].(map[string]interface{})["Torque"].(float64))
 		dr.profile.Fields[i].AD = uint16(p[i].(map[string]interface{})["AD"].(float64))
 	}
-	fmt.Println(dr.profile.Fields)
-	return nil
+	data := dr.profile.MarshalBytes()
+	int16Data := message.FromUInt16(data[:])
+	var arr [96]byte
+	copy(arr[:], int16Data)
+	torqueData := message.MakeTorqueData(arr)
+	err := dr.driver.SendMessage(torqueData)
+	if err != nil {
+		return "", err
+	}
+	return "OK", nil
 }
 
 func main() {
-
 	js := mewn.String("./frontend/build/static/js/main.js")
 	css := mewn.String("./frontend/build/static/css/main.css")
-
 	app := wails.CreateApp(&wails.AppConfig{
 		Width:  1024,
 		Height: 768,
@@ -67,6 +76,16 @@ func main() {
 		CSS:    css,
 		Colour: "#131313",
 	})
-	app.Bind(&Drill{})
+
+	log := logrus.New()
+	config := &serial.Config{Name: "/dev/tty.usbserial-AC019QP9", Baud: 9600}
+	mock := true
+	p := serialport.MakeSerialPort(config, mock)
+	d := serialport.MakeDriver(p, log)
+	defer p.Close()
+
+	app.Bind(&Drill{
+		driver: d,
+	})
 	app.Run()
 }
