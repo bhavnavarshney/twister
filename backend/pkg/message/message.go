@@ -13,8 +13,8 @@ const (
 	DrillTypeMsg        = 0x04
 	DrillIDMsg          = 0x05
 	SingleParamMsg      = 0x06
-	TorqueOffsetMsg     = 0x11
-	ReadOffsetMsg       = 0x13
+	CalibratedOffsetMsg = 0x11
+	CurrentOffsetMsg    = 0x16
 	BulkParamSendMsg    = 0x14
 	BulkParamReceiveMsg = 0x15
 )
