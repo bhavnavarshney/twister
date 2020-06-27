@@ -19,9 +19,9 @@ func Encode(input []byte) []byte {
 }
 
 func ToUInt16(input []byte) []uint16 {
-	assembledBytes := make([]uint16, len(input)/2)
-	for i := range assembledBytes {
-		assembledBytes[i] = uint16(input[i])<<8 | uint16(input[i+1])
+	var assembledBytes []uint16
+	for i := 0; i < len(input); i += 2 {
+		assembledBytes = append(assembledBytes, uint16(input[i])<<8|uint16(input[i+1]))
 	}
 	return assembledBytes
 }
