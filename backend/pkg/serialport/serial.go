@@ -41,6 +41,8 @@ type Driver struct {
 	Log    *logrus.Logger
 }
 
+// Message just receive a single byte response
+// POST
 func (sp *Driver) SendMessage(m Message) error {
 	_, err := sp.write(m.Marshal())
 	if err != nil {
@@ -68,6 +70,8 @@ func (sp *Driver) SendMessage(m Message) error {
 	return nil
 }
 
+// Commands receive a full payload response
+// GET
 func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 	_, err := sp.write(m.Marshal())
 	if err != nil {

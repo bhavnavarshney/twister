@@ -25,13 +25,54 @@ const (
 	BulkParamReceiveMsgLen = 24*4*2 + 4
 )
 
+func MakeTorqueParam(id byte, message [4]byte) *TorqueParam {
+	return &TorqueParam{
+		header:   HeaderByte,
+		dataInfo: SingleParamMsg,
+		id:       id,
+		message:  message,
+	}
+}
+
+type TorqueParam struct {
+	header   byte
+	dataInfo byte
+	id       byte
+	message  [4]byte
+	checksum byte
+}
+
+func (td *TorqueParam) Marshal() []byte {
+	dataInfoAdded := append([]byte{td.dataInfo, td.id}, td.message[:]...)
+	td.checksum = Checksum(dataInfoAdded)
+	headers := []byte{td.header, td.dataInfo}
+	payload := append([]byte{td.id}, td.message[:]...)
+	encodedData := Encode(append(payload, td.checksum))
+	return append(headers, encodedData...)
+}
+
+func (td *TorqueParam) Response() []byte {
+	return []byte{OkStatus}
+}
+
+func (td *TorqueParam) ResponseLen() int {
+	return 1
+}
+
+func (td *TorqueParam) Retry() int {
+	return 1
+}
+
+func (td *TorqueParam) Timeout() time.Duration {
+	return time.Second
+}
+
 func MakeTorqueData(message [24 * 4]byte) *TorqueData {
 	return &TorqueData{
 		header:   HeaderByte,
 		dataInfo: BulkParamSendMsg,
 		message:  message,
 	}
-
 }
 
 type TorqueData struct {

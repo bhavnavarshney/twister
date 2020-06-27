@@ -28,6 +28,21 @@ func (dr *Drill) GetInfo() string {
 	return ""
 }
 
+func (dr *Drill) WriteParam(p map[string]interface{}) (string, error) {
+	id := byte(p["ID"].(float64))
+	torque := uint16(p["Torque"].(float64))
+	ad := uint16(p["AD"].(float64))
+	int16Data := message.FromUInt16([]uint16{torque, ad})
+	var arr [4]byte
+	copy(arr[:], int16Data)
+	torqueParam := message.MakeTorqueParam(id, arr)
+	err := dr.driver.SendMessage(torqueParam)
+	if err != nil {
+		return "", err
+	}
+	return "OK", nil
+}
+
 func (dr *Drill) GetProfile() profile.Profile {
 	readProfileCommand := serialport.MakeCommand(message.BulkParamReceiveMsg, message.BulkParamReceiveMsgLen)
 	response, err := dr.driver.SendCommand(readProfileCommand)

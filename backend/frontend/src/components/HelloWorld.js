@@ -49,6 +49,9 @@ export default function HelloWorld() {
           data[data.indexOf(oldData)] = cleanFormat(newData);
           console.log(cleanFormat(newData))
           setProfile(data);
+          window.backend.Drill.WriteParam(cleanFormat(newData)).then((result) => {
+            console.log(result)
+          });
         }
       }, 600);
     });
