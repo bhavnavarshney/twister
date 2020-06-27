@@ -85,16 +85,17 @@ func main() {
 	js := mewn.String("./frontend/build/static/js/main.js")
 	css := mewn.String("./frontend/build/static/css/main.css")
 	app := wails.CreateApp(&wails.AppConfig{
-		Width:  1440,
-		Height: 900,
-		Title:  "twister",
-		JS:     js,
-		CSS:    css,
-		Colour: "#131313",
+		Width:     1440,
+		Height:    900,
+		Resizable: true,
+		Title:     "TMAX Torque Calibration",
+		JS:        js,
+		CSS:       css,
+		Colour:    "#131313",
 	})
 
 	log := logrus.New()
-	config := &serial.Config{Name: "/dev/tty.usbserial-AC019QP9", Baud: 9600}
+	config := &serial.Config{Name: "COM3", Baud: 9600}
 	mock := false
 	p := serialport.MakeSerialPort(config, mock)
 	defer p.Close()
