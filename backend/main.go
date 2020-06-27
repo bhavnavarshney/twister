@@ -15,8 +15,8 @@ import (
 type Drill struct {
 	driver           *serialport.Driver
 	profile          profile.Profile
-	calibratedOffset uint16
-	currentOffset    uint16
+	calibratedOffset uint16 // Indicates the zero value for the sensor
+	currentOffset    uint16 // Indicates the current zero value for the sensor, we need to poll this every second
 	info             string
 }
 
