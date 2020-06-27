@@ -5,8 +5,9 @@ A demo application in Go
 ## Prerequisites
 
 - Go1.14
-- Wails `go get -u github.com/wailsapp/wails/cmd/wails`
+- Wails v1.6.0+ `go get -u github.com/wailsapp/wails/cmd/wails`
 - NodeJS
+- Docker (for building cross platform images)
 
 ## Getting Started
 

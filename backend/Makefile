@@ -11,5 +11,7 @@ build:
 	rm -rf dist
 	mkdir dist
 	go build -o dist ./...
+build-windows:
+	wails build -x windows/amd64 -p
 windows:
 	GOOS=windows GOARCH=amd64 go build cmd/twister/main.go

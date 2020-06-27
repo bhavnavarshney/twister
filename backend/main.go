@@ -85,8 +85,8 @@ func main() {
 	js := mewn.String("./frontend/build/static/js/main.js")
 	css := mewn.String("./frontend/build/static/css/main.css")
 	app := wails.CreateApp(&wails.AppConfig{
-		Width:  1024,
-		Height: 768,
+		Width:  1440,
+		Height: 900,
 		Title:  "twister",
 		JS:     js,
 		CSS:    css,
