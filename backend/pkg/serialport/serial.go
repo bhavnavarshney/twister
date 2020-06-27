@@ -73,25 +73,33 @@ func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	time.Sleep(2 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 
 	bytesReceived := 0
 	var received []byte
 	for bytesReceived < m.ResponseLen() {
 		fmt.Printf("reading %d bytes out of %d expected", bytesReceived, m.ResponseLen())
-		buf := make([]byte, m.ResponseLen())
+		buf := make([]byte, 50)
 		numBytesRead, err := sp.read(buf)
 		fmt.Printf("reading %d bytes", numBytesRead)
 		if err != nil {
 			return nil, fmt.Errorf("error reading from port: %w", err)
 		}
-		// Check that we're starting with 0x21
-		//if (buf[0] == byte(0x21)) || (len(received) > 0 && (received[0] == byte(0x21))) {
-		fmt.Println("Header detected")
-		bytesReceived += numBytesRead
-		fmt.Println(received)
-		received = append(received, buf[:numBytesRead]...)
-		//}
+
+		// already have header
+		if len(received) > 0 && (received[0] == byte(0x21)) {
+			bytesReceived += numBytesRead
+			fmt.Println(received)
+			received = append(received, buf[:numBytesRead]...)
+		} else {
+			// waiting for header
+			if startIndex := bytes.Index(buf, []byte{0x21}); startIndex != -1 {
+				fmt.Println("Header detected")
+				receiveData := buf[startIndex:numBytesRead]
+				bytesReceived += len(receiveData)
+				received = append(received, receiveData...)
+			}
+		}
 	}
 
 	return received, nil
@@ -111,6 +119,19 @@ func NibbledChecksum(dataInfo []byte) [2]byte {
 	var encodedChecksum [2]byte
 	copy(encodedChecksum[:], message.Encode([]byte{checksum}))
 	return encodedChecksum
+}
+
+type Message interface {
+	// Marshal serialises the message into an slice of bytes
+	Marshal() []byte
+	// Response returns an expected response
+	Response() []byte
+	// Number of bytes expected
+	ResponseLen() int
+	// Retry returns the number of time to retry when sending a message
+	Retry() int
+	// Timeout in milliseconds
+	Timeout() time.Duration
 }
 
 type Command struct {
@@ -185,17 +206,4 @@ type Port interface {
 	Write(out []byte) (int, error)
 	Read([]byte) (int, error)
 	Close() error
-}
-
-type Message interface {
-	// Marshal serialises the message into an slice of bytes
-	Marshal() []byte
-	// Response returns an expected response
-	Response() []byte
-	// Number of bytes expected
-	ResponseLen() int
-	// Retry returns the number of time to retry when sending a message
-	Retry() int
-	// Timeout in milliseconds
-	Timeout() time.Duration
 }
