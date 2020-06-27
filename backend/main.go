@@ -55,6 +55,7 @@ func (dr *Drill) GetProfile() profile.Profile {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Torque Data Hex: %X", torqueData.ToByte())
 	int16Data := message.ToUInt16(torqueData.ToByte())
 	fmt.Printf("Torque Int16 Data: %d\n", int16Data)
 	var profileArr [48]uint16
@@ -94,11 +95,15 @@ func main() {
 
 	log := logrus.New()
 	config := &serial.Config{Name: "/dev/tty.usbserial-AC019QP9", Baud: 9600}
-	mock := true
+	mock := false
 	p := serialport.MakeSerialPort(config, mock)
-	d := serialport.MakeDriver(p, log)
 	defer p.Close()
-
+	d := serialport.MakeDriver(p, log)
+	ok := d.SendKeepAlive()
+	if !ok {
+		panic("Error connecting to drill")
+	}
+	log.Printf("Connected")
 	app.Bind(&Drill{
 		driver: d,
 	})

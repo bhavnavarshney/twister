@@ -2,7 +2,6 @@ package serialport
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -54,19 +53,24 @@ func (sp *Driver) SendMessage(m Message) error {
 	for bytesReceived < m.ResponseLen() {
 		numBytesRead, err := sp.read(buf)
 		sp.Log.Printf("Read %d bytes from port", numBytesRead)
-		sp.Log.Printf("Received response: %d", buf)
+		sp.Log.Printf("Received response: %d", buf[:numBytesRead])
 		if err != nil {
 			return fmt.Errorf("error reading from port: %w", err)
 		}
-		bytesReceived += numBytesRead
+		if bytes.Contains(buf, m.Response()) {
+			bytesReceived += numBytesRead
+			sp.Log.Printf("Received expected response %X", m.Response())
+		} else {
+			sp.Log.Warnf("Expected %X but received %X", m.Response(), buf)
+		}
 	}
 
-	// If there's an expected response, check it
-	if len(m.Response()) > 0 && !bytes.Equal(m.Response(), buf) {
-		// Retry, bump retry count
-		//return sp.SendMessage(m)
-		return errors.New("Unable to send message")
-	}
+	// // If there's an expected response, check it
+	// if len(m.Response()) > 0 && !bytes.Equal(m.Response(), buf) {
+	// 	// Retry, bump retry count
+	// 	//return sp.SendMessage(m)
+	// 	return fmt.Errorf("Expected %X but received %X", m.Response(), buf)
+	// }
 	return nil
 }
 
