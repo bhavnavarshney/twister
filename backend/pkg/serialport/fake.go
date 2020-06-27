@@ -35,6 +35,11 @@ func (mp *FakePort) Write(out []byte) (int, error) {
 	}
 	mp.Log.Println("Writing to mock port")
 	mp.writeLog = append(mp.writeLog, out...)
+	// If it's 0x07, we respond with the same
+	if len(out) == 1 && out[0] == byte(KeepAlive) {
+		mp.readBuffer = append(mp.readBuffer, KeepAlive)
+		return len(out), nil
+	}
 	// we always read the second byte to see what to do
 	mp.readBuffer = append(mp.readBuffer, responseMap[out[1]]...)
 	mp.Log.Printf("Adding %X to read buffer", responseMap[out[1]])
