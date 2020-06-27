@@ -89,12 +89,14 @@ export default function HelloWorld() {
         <Grid item xs={3}>
           <ParamTable
             id="unique"
+            title="Clockwise"
             params={profile.slice(0,12)}
             handleRowUpdate={rowUpdateHandler}
           />
         </Grid>
         <Grid item xs={3}>
           <ParamTable
+            title="Counterclockwise"
             params={profile.slice(12,24)}
             handleRowUpdate={rowUpdateHandler}
           />

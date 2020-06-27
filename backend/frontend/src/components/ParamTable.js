@@ -53,12 +53,12 @@ export default function ParamTable(props) {
           search: false,
           sorting: false,
           paging: false,
-          toolbar: false,
+          toolbar: true,
           showFirstLastPageButtons: false,
         }}
         icons={tableIcons}
         localization={{ pagination: { labelRowsPerPage: "12" } }}
-        title="Editable Example"
+        title={props.title}
         columns={columns}
         data={props.params}
         editable={{
