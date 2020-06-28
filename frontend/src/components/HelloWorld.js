@@ -33,12 +33,12 @@ export default function HelloWorld() {
     });
   };
 
-  const handleWrite = () => {
-    const cleanProfile = profile.map((row) => cleanFormat(row));
-    window.backend.Drill.WriteProfile(cleanProfile).then((result) => {
-      console.log(result);
-    });
-  };
+  // const handleWrite = () => {
+  //   const cleanProfile = profile.map((row) => cleanFormat(row));
+  //   window.backend.Drill.WriteProfile(cleanProfile).then((result) => {
+  //     console.log(result);
+  //   });
+  // };
 
   const rowUpdateHandler = (newData, oldData) =>
     new Promise((resolve) => {
