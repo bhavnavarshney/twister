@@ -1,6 +1,5 @@
 import React, { forwardRef } from "react";
 import MaterialTable from "material-table";
-import Paper from "@material-ui/core/Paper";
 import TextField from "@material-ui/core/TextField";
 import Check from "@material-ui/icons/Check";
 import Clear from "@material-ui/icons/Clear";
@@ -14,19 +13,21 @@ const tableIcons = {
 
 export default function ParamTable(props) {
   const columns = [
-    { title: "ID", field: "ID", type: "numeric", editable: "never" },
+    { title: "ID", field: "ID", type: "numeric", editable: "never", cellStyle:{textAlign:"left", fontWeight: "400"}, headerStyle:{textAlign:"left"}, },
     {
       title: "Torque",
       field: "Torque",
       type: "numeric",
+      cellStyle:{textAlign:"left"}, headerStyle:{textAlign:"left"},
       editComponent: (props) => {
         return (
           <TextField
             style={{
-              maxWidth: "120px"
+              maxWidth: "120px",
             }}
             value={props.value}
             type="number"
+            color="secondary"
             onChange={(e) => props.onChange(e.target.value)}
             inputProps={{ min: "0", max: "65535", step: "1" }}
           />
@@ -37,14 +38,16 @@ export default function ParamTable(props) {
       title: "AD",
       field: "AD",
       type: "numeric",
+      cellStyle:{textAlign:"left"}, headerStyle:{textAlign:"left"},
       editComponent: (props) => {
         return (
           <TextField
-          style={{
-            maxWidth: "120px"
-          }}
+            style={{
+              maxWidth: "120px",
+            }}
             value={props.value}
             type="number"
+            color="secondary"
             onChange={(e) => props.onChange(e.target.value)}
             inputProps={{ min: "0", max: "65535", step: "1" }}
           />
@@ -53,26 +56,25 @@ export default function ParamTable(props) {
     },
   ];
   return (
-    <Paper>
-      <MaterialTable
-        options={{
-          search: false,
-          sorting: false,
-          paging: false,
-          toolbar: true,
-          showFirstLastPageButtons: false,
-        }}
-        icons={tableIcons}
-        localization={{ pagination: { labelRowsPerPage: "12" } }}
-        title={props.title}
-        columns={columns}
-        data={props.params}
-        editable={{
-          isEditable: (rowData) => rowData.name !== "ID",
-          isDeleteHidden: (rowData) => true,
-          onRowUpdate: props.handleRowUpdate,
-        }}
-      />
-    </Paper>
+    <MaterialTable
+      options={{
+        search: false,
+        sorting: false,
+        paging: false,
+        toolbar: true,
+        showFirstLastPageButtons: false,
+        actionsColumnIndex: -1
+      }}
+      icons={tableIcons}
+      localization={{ pagination: { labelRowsPerPage: "12" } }}
+      title={props.title}
+      columns={columns}
+      data={props.params}
+      editable={{
+        isEditable: (rowData) => rowData.name !== "ID",
+        isDeleteHidden: (rowData) => true,
+        onRowUpdate: props.handleRowUpdate,
+      }}
+    />
   );
 }

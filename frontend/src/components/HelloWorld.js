@@ -1,6 +1,4 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
-import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import InfoCard from "./InfoCard";
 import ParamTable from "./ParamTable";
@@ -64,7 +62,7 @@ export default function HelloWorld() {
         <Grid item xs={2} style={{ minWidth: "300px" }}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <InfoCard />
+              <InfoCard handleOpen={handleRead}/>
             </Grid>
           </Grid>
         </Grid>
@@ -72,7 +70,7 @@ export default function HelloWorld() {
           item
           xs={4}
           style={{
-            minWidth: "300px",
+            minWidth: "400px",
           }}
         >
           <ParamTable
@@ -86,7 +84,7 @@ export default function HelloWorld() {
           item
           xs={4}
           style={{
-            minWidth: "300px",
+            minWidth: "400px",
           }}
         >
           <ParamTable
@@ -95,7 +93,7 @@ export default function HelloWorld() {
             handleRowUpdate={rowUpdateHandler}
           />
         </Grid>
-        <Grid item xs={1}>
+        {/* <Grid item xs={1}>
           <Paper>
             <Grid container spacing={0}>
               <Grid item xs={12}>
@@ -109,7 +107,7 @@ export default function HelloWorld() {
               </Grid>
             </Grid>
           </Paper>
-        </Grid>
+        </Grid> */}
       </Grid>
     </div>
   );
