@@ -133,7 +133,7 @@ func main() {
 		Width:     1440,
 		Height:    900,
 		Resizable: true,
-		Title:     "TMAX Torque Calibration",
+		Title:     "NPT Calibration",
 		JS:        js,
 		CSS:       css,
 		Colour:    "#131313",
