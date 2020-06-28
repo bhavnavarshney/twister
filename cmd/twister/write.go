@@ -11,7 +11,10 @@ import (
 func Write(c *cli.Context) error {
 	log := logrus.New()
 	config := &serial.Config{Name: c.String("port"), Baud: c.Int("baud")}
-	p := serialport.MakeSerialPort(config, c.Bool("mock"))
+	p, err := serialport.MakeSerialPort(config, c.Bool("mock"))
+	if err != nil {
+		return err
+	}
 	defer p.Close()
 	d := serialport.MakeDriver(p, log)
 	data := new([24 * 4]byte)

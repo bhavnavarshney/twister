@@ -22,21 +22,32 @@ function cleanFormat(rowData) {
 }
 
 export default function HelloWorld() {
+  const [info, setInfo] = React.useState({});
+  const [port, setPort] = React.useState("COM3");
   const [profile, setProfile] = React.useState([]);
 
   const handleClose = () => {
     window.backend.Drill.Close().then((result) => {
+      setInfo({})
+      setProfile([])
       console.log(result)
+    }).catch((err)=> {
+      console.log(err)
     });
   }
+  const handleSetPort = (e) => {
+    setPort("COM" + e.target.value.toString())
+  }
   const handleRead = () => {
-    window.backend.Open().then((result)=>{
+    window.backend.Drill.Open(port.toString()).then((result)=>{
       window.backend.Drill.GetInfo().then((result) => {
         window.backend.Drill.GetProfile().then((result) => {
           const newProfile = mapFieldsToProfile(result.Fields);
           setProfile(newProfile);
         });
       });
+    }).catch((err)=>{
+      console.log(err)
     })
     
 
@@ -73,7 +84,7 @@ export default function HelloWorld() {
         <Grid item xs={2} style={{ minWidth: "300px" }}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <InfoCard handleOpen={handleRead} handleClose={handleClose}/>
+              <InfoCard handleOpen={handleRead} handleClose={handleClose} handleSetPort={handleSetPort}/>
             </Grid>
           </Grid>
         </Grid>

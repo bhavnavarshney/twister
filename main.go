@@ -1,7 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/profile"
@@ -18,25 +21,56 @@ type Drill struct {
 	calibratedOffset uint16 // Indicates the zero value for the sensor
 	currentOffset    uint16 // Indicates the current zero value for the sensor, we need to poll this every second
 	info             string
+	log              *logrus.Logger
 }
 
-func (dr *Drill) Open(portName string) string {
-	return "Opened"
+func (dr *Drill) Open(portName string) (string, error) {
+	config := &serial.Config{Name: portName, Baud: 9600, ReadTimeout: time.Second * 2}
+	var mock bool
+	if portName == "COM999" {
+		mock = true
+	}
+	p, err := serialport.MakeSerialPort(config, mock)
+	if err != nil {
+		return "", err
+	}
+	dr.driver = serialport.MakeDriver(p, dr.log)
+	ok := dr.driver.SendKeepAlive()
+	if !ok {
+		return "", errors.New("Drill not connected.")
+	}
+	log.Println("Port Opened")
+	return "Opened", nil
 }
 
-func (dr *Drill) Close() string {
-	return "Closed"
+func (dr *Drill) Close() (string, error) {
+	if dr.driver == nil {
+		return "", errors.New("Port not open")
+	}
+	err := dr.driver.Port.Close()
+	if err != nil {
+		return "", err
+	}
+	dr.driver = nil
+	return "Closed", nil
 }
 
-func (dr *Drill) GetInfo() string {
-	// ID
-	// Type
-	// Current Offset
-	// Calibrated Offset
-	return ""
+type Info struct {
+	id               string
+	drillType        string
+	currentOffset    uint16
+	calibratedOffset uint16
+}
+
+func (dr *Drill) GetInfo() (Info, error) {
+
+	return Info{}, nil
 }
 
 func (dr *Drill) WriteParam(p map[string]interface{}) (string, error) {
+	if dr.driver == nil {
+		return "", errors.New("Port has not been opened")
+	}
 	id := byte(p["ID"].(float64))
 	torque := uint16(p["Torque"].(float64))
 	ad := uint16(p["AD"].(float64))
@@ -51,7 +85,10 @@ func (dr *Drill) WriteParam(p map[string]interface{}) (string, error) {
 	return "OK", nil
 }
 
-func (dr *Drill) GetProfile() profile.Profile {
+func (dr *Drill) GetProfile() (profile.Profile, error) {
+	if dr.driver == nil {
+		return profile.Profile{}, errors.New("Port has not been opened")
+	}
 	readProfileCommand := serialport.MakeCommand(message.BulkParamReceiveMsg, message.BulkParamReceiveMsgLen)
 	response, err := dr.driver.SendCommand(readProfileCommand)
 	if err != nil {
@@ -69,7 +106,7 @@ func (dr *Drill) GetProfile() profile.Profile {
 	var profileArr [48]uint16
 	copy(profileArr[:], int16Data)
 	profile := profile.MakeProfile(profileArr)
-	return *profile
+	return *profile, nil
 }
 
 func (dr *Drill) WriteProfile(p []interface{}) (string, error) {
@@ -101,20 +138,17 @@ func main() {
 		CSS:       css,
 		Colour:    "#131313",
 	})
-
-	log := logrus.New()
-	config := &serial.Config{Name: "COM3", Baud: 9600}
-	mock := true
-	p := serialport.MakeSerialPort(config, mock)
-	defer p.Close()
-	d := serialport.MakeDriver(p, log)
-	ok := d.SendKeepAlive()
-	if !ok {
-		panic("Error connecting to drill")
+	d := &Drill{}
+	d.log = logrus.New()
+	app.Bind(d)
+	err := app.Run()
+	if err != nil {
+		d.log.Errorln(err)
 	}
-	log.Printf("Connected")
-	app.Bind(&Drill{
-		driver: d,
-	})
-	app.Run()
+	if d.driver != nil {
+		err := d.driver.Port.Close()
+		if err != nil {
+			d.log.Errorln(err)
+		}
+	}
 }

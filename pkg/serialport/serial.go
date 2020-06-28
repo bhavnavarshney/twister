@@ -11,7 +11,7 @@ import (
 	"github.com/tarm/serial"
 )
 
-func MakeSerialPort(config *serial.Config, isFake bool) Port {
+func MakeSerialPort(config *serial.Config, isFake bool) (Port, error) {
 	var p Port
 	var err error
 	if isFake {
@@ -21,9 +21,9 @@ func MakeSerialPort(config *serial.Config, isFake bool) Port {
 		p, err = serial.OpenPort(config)
 	}
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return p
+	return p, nil
 }
 
 func MakeDriver(p Port, log *logrus.Logger) *Driver {
