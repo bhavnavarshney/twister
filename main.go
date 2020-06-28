@@ -56,15 +56,45 @@ func (dr *Drill) Close() (string, error) {
 }
 
 type Info struct {
-	id               string
-	drillType        string
-	currentOffset    uint16
-	calibratedOffset uint16
+	DrillID          string `json:"DrillID"`
+	DrillType        string `json:"DrillType"`
+	CurrentOffset    uint16 `json:"CurrentOffset"`
+	CalibratedOffset uint16 `json:"CalibratedOffset"`
 }
 
 func (dr *Drill) GetInfo() (Info, error) {
+	drillTypeCommand := serialport.MakeCommand(message.DrillTypeMsg, message.DrillTypeMsgLen)
+	response, err := dr.driver.SendCommand(drillTypeCommand)
+	if err != nil {
+		return Info{}, err
+	}
+	drillType := message.DrillType{}
+	err = drillType.Unmarshal(response)
 
-	return Info{}, nil
+	if err != nil {
+		return Info{}, err
+	}
+
+	drillIDCommand := serialport.MakeCommand(message.DrillIDMsg, message.DrillIDMsgLen)
+	response, err = dr.driver.SendCommand(drillIDCommand)
+	if err != nil {
+		return Info{}, err
+	}
+
+	drillID := message.DrillID{}
+	err = drillID.Unmarshal(response)
+
+	if err != nil {
+		return Info{}, err
+	}
+	fmt.Println(Info{
+		DrillType: drillType.ToString(),
+		DrillID:   drillID.ToString(),
+	})
+	return Info{
+		DrillType: drillType.ToString(),
+		DrillID:   drillID.ToString(),
+	}, nil
 }
 
 func (dr *Drill) WriteParam(p map[string]interface{}) (string, error) {

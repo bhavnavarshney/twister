@@ -52,16 +52,17 @@ export default function HelloWorld() {
     window.backend.Drill.Open(port.toString()).then((result)=>{
      setShowSnackBar({message: "Drill Connected", severity: "success"})
       window.backend.Drill.GetInfo().then((result) => {
-        setInfo({
-
-        })
+        setInfo(result)
         window.backend.Drill.GetProfile().then((result) => {
           const newProfile = mapFieldsToProfile(result.Fields);
           setProfile(newProfile);
         });
+      }).catch((err)=>{
+        console.log(err)
+        setShowSnackBar({message: "Error getting info" + err, severity: "error"})
       });
     }).catch((err)=>{
-      setShowSnackBar({message: "Error connecting", severity: "error"})
+      setShowSnackBar({message: "Error connecting: "+err, severity: "error"})
     })
     
 
@@ -99,7 +100,7 @@ export default function HelloWorld() {
         <Grid item xs={2} style={{ minWidth: "300px" }}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <InfoCard handleOpen={handleRead} handleClose={handleClose} handleSetPort={handleSetPort}/>
+              <InfoCard data={info} handleOpen={handleRead} handleClose={handleClose} handleSetPort={handleSetPort}/>
             </Grid>
           </Grid>
         </Grid>

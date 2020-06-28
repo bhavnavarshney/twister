@@ -35,16 +35,15 @@ function createData(name, field) {
   return { name, field };
 }
 
-const rows = [
-  createData("Drill ID", "181903040506"),
-  createData("Drill Type", "W2GG9850"),
-  createData("Calibrated Offset", 262),
-  createData("Current Offset", "1234"),
-  createData("Status", "Connected"),
-];
-
 export default function InfoCard(props) {
   const classes = useStyles();
+  const rows = [
+    createData("Drill ID", props.data.DrillID),
+    createData("Drill Type", props.data.DrillType),
+    createData("Calibrated Offset", props.data.CalibratedOffset),
+    createData("Current Offset", props.data.CurrentOffset),
+    createData("Status", !props.data.DrillID? "Not Connected":"Connected"),
+  ];
 
   return (
     <Card className={classes.root}>
