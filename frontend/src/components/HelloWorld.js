@@ -46,10 +46,10 @@ export default function HelloWorld() {
   };
 
   const handleSetPort = (e) => {
-    setPort("COM" + e.target.value.toString())
+    setPort(e.target.value)
   }
   const handleRead = () => {
-    window.backend.Drill.Open(port.toString()).then((result)=>{
+    window.backend.Drill.Open("COM" + port.toString()).then((result)=>{
      setShowSnackBar({message: "Drill Connected", severity: "success"})
       window.backend.Drill.GetInfo().then((result) => {
         setInfo(result)
