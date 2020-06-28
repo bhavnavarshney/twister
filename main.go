@@ -96,7 +96,7 @@ func main() {
 
 	log := logrus.New()
 	config := &serial.Config{Name: "COM3", Baud: 9600}
-	mock := false
+	mock := true
 	p := serialport.MakeSerialPort(config, mock)
 	defer p.Close()
 	d := serialport.MakeDriver(p, log)
