@@ -21,6 +21,8 @@ const (
 
 const (
 	DrillIDMsgLen          = 16
+	CurrentOffsetMsgLen    = 8
+	CalibratedOffsetMsgLen = 8
 	DrillTypeMsgLen        = 20
 	BulkParamReceiveMsgLen = 24*4*2 + 4
 )
@@ -223,6 +225,38 @@ func (id *DrillID) isValidChecksum() error {
 
 func (id *DrillID) Marshal() []byte {
 	return append([]byte{id.header}, id.message[:]...)
+}
+
+type Offset struct {
+	header   byte
+	dataInfo byte
+	message  [2]byte
+	checksum byte
+}
+
+func (id *Offset) Unmarshal(input []byte) error {
+	id.header = input[0]
+	id.dataInfo = input[1]
+	decodedData, err := Decode(input[2:])
+	if err != nil {
+		return err
+	}
+	copy(id.message[:], decodedData)
+	id.checksum = decodedData[len(decodedData)-1]
+	fmt.Printf("%X", id.checksum)
+	return id.isValidChecksum()
+}
+
+func (id *Offset) isValidChecksum() error {
+	calc := Checksum(append([]byte{id.dataInfo}, id.message[:]...))
+	if calc != id.checksum {
+		return fmt.Errorf("checksum mismatch, expected %x, received %x", calc, id.checksum)
+	}
+	return nil
+}
+
+func (id *Offset) ToUInt16() uint16 {
+	return ToUInt16(id.message[:])[0]
 }
 
 type Command struct {

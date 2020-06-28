@@ -70,7 +70,6 @@ func (dr *Drill) GetInfo() (Info, error) {
 	}
 	drillType := message.DrillType{}
 	err = drillType.Unmarshal(response)
-
 	if err != nil {
 		return Info{}, err
 	}
@@ -80,20 +79,39 @@ func (dr *Drill) GetInfo() (Info, error) {
 	if err != nil {
 		return Info{}, err
 	}
-
 	drillID := message.DrillID{}
 	err = drillID.Unmarshal(response)
-
 	if err != nil {
 		return Info{}, err
 	}
-	fmt.Println(Info{
-		DrillType: drillType.ToString(),
-		DrillID:   drillID.ToString(),
-	})
+
+	currentOffsetCommand := serialport.MakeCommand(message.CurrentOffsetMsg, message.CurrentOffsetMsgLen)
+	response, err = dr.driver.SendCommand(currentOffsetCommand)
+	if err != nil {
+		return Info{}, err
+	}
+	currentOffset := message.Offset{}
+	err = currentOffset.Unmarshal(response)
+	if err != nil {
+		return Info{}, err
+	}
+
+	calibratedOffsetCommand := serialport.MakeCommand(message.CalibratedOffsetMsg, message.CalibratedOffsetMsgLen)
+	response, err = dr.driver.SendCommand(calibratedOffsetCommand)
+	if err != nil {
+		return Info{}, err
+	}
+	calibratedOffset := message.Offset{}
+	err = calibratedOffset.Unmarshal(response)
+	if err != nil {
+		return Info{}, err
+	}
+
 	return Info{
-		DrillType: drillType.ToString(),
-		DrillID:   drillID.ToString(),
+		DrillType:        drillType.ToString(),
+		DrillID:          drillID.ToString(),
+		CurrentOffset:    currentOffset.ToUInt16(),
+		CalibratedOffset: calibratedOffset.ToUInt16(),
 	}, nil
 }
 
