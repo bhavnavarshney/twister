@@ -7,6 +7,7 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
+import NumericInput from "react-numeric-input";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -42,7 +43,7 @@ export default function InfoCard(props) {
     createData("Drill Type", props.data.DrillType),
     createData("Calibrated Offset", props.data.CalibratedOffset),
     createData("Current Offset", props.data.CurrentOffset),
-    createData("Status", !props.data.DrillID? "Not Connected":"Connected"),
+    createData("Status", !props.data.DrillID ? "Not Connected" : "Connected"),
   ];
 
   return (
@@ -62,9 +63,8 @@ export default function InfoCard(props) {
               startAdornment: (
                 <InputAdornment position="start">COM</InputAdornment>
               ),
-              min: "0",
-              max: "65535",
-              step: "1",
+              inputComponent: NumericInput,
+              inputProps: { min: "0", max: "65535", step: "1" },
             }}
             type="number"
             style={{ padding: "15px" }}

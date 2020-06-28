@@ -1,5 +1,6 @@
 import React, { forwardRef } from "react";
 import MaterialTable from "material-table";
+import NumericInput from 'react-numeric-input';
 import TextField from "@material-ui/core/TextField";
 import Check from "@material-ui/icons/Check";
 import Clear from "@material-ui/icons/Clear";
@@ -22,6 +23,7 @@ export default function ParamTable(props) {
       editComponent: (props) => {
         return (
           <TextField
+            Inputref={{NumericInput}}
             style={{
               maxWidth: "120px",
             }}
@@ -29,7 +31,7 @@ export default function ParamTable(props) {
             type="number"
             color="secondary"
             onChange={(e) => props.onChange(e.target.value)}
-            inputProps={{ min: "0", max: "65535", step: "1" }}
+            InputProps={{ inputComponent: NumericInput, inputProps:{min: "0", max: "65535", step: "1"} }}
           />
         );
       },
@@ -49,7 +51,7 @@ export default function ParamTable(props) {
             type="number"
             color="secondary"
             onChange={(e) => props.onChange(e.target.value)}
-            inputProps={{ min: "0", max: "65535", step: "1" }}
+            InputProps={{ inputComponent: NumericInput, inputProps:{min: "0", max: "65535", step: "1"} }}
           />
         );
       },
