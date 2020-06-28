@@ -87,7 +87,7 @@ export default function InfoCard(props) {
         <Button variant="contained" color="primary" onClick={props.handleOpen}>
           Open
         </Button>
-        <Button variant="contained" color="secondary">
+        <Button variant="contained" color="secondary" onClick={props.handleClose}>
           Close
         </Button>
       </CardActions>

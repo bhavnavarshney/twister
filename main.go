@@ -20,6 +20,14 @@ type Drill struct {
 	info             string
 }
 
+func (dr *Drill) Open(portName string) string {
+	return "Opened"
+}
+
+func (dr *Drill) Close() string {
+	return "Closed"
+}
+
 func (dr *Drill) GetInfo() string {
 	// ID
 	// Type

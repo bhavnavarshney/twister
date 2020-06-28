@@ -24,11 +24,22 @@ function cleanFormat(rowData) {
 export default function HelloWorld() {
   const [profile, setProfile] = React.useState([]);
 
-  const handleRead = () => {
-    window.backend.Drill.GetProfile().then((result) => {
-      const newProfile = mapFieldsToProfile(result.Fields);
-      setProfile(newProfile);
+  const handleClose = () => {
+    window.backend.Drill.Close().then((result) => {
+      console.log(result)
     });
+  }
+  const handleRead = () => {
+    window.backend.Open().then((result)=>{
+      window.backend.Drill.GetInfo().then((result) => {
+        window.backend.Drill.GetProfile().then((result) => {
+          const newProfile = mapFieldsToProfile(result.Fields);
+          setProfile(newProfile);
+        });
+      });
+    })
+    
+
   };
 
   // const handleWrite = () => {
@@ -62,7 +73,7 @@ export default function HelloWorld() {
         <Grid item xs={2} style={{ minWidth: "300px" }}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <InfoCard handleOpen={handleRead}/>
+              <InfoCard handleOpen={handleRead} handleClose={handleClose}/>
             </Grid>
           </Grid>
         </Grid>
