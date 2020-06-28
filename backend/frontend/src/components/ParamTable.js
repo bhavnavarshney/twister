@@ -22,6 +22,9 @@ export default function ParamTable(props) {
       editComponent: (props) => {
         return (
           <TextField
+            style={{
+              maxWidth: "120px"
+            }}
             value={props.value}
             type="number"
             onChange={(e) => props.onChange(e.target.value)}
@@ -37,6 +40,9 @@ export default function ParamTable(props) {
       editComponent: (props) => {
         return (
           <TextField
+          style={{
+            maxWidth: "120px"
+          }}
             value={props.value}
             type="number"
             onChange={(e) => props.onChange(e.target.value)}

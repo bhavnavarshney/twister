@@ -19,8 +19,8 @@ function cleanFormat(rowData) {
   return {
     ID: rowData.ID,
     AD: parseInt(rowData.AD),
-    Torque: parseInt(rowData.Torque)
-  }
+    Torque: parseInt(rowData.Torque),
+  };
 }
 
 export default function HelloWorld() {
@@ -34,9 +34,9 @@ export default function HelloWorld() {
   };
 
   const handleWrite = () => {
-    const cleanProfile = profile.map(row=>cleanFormat(row))
+    const cleanProfile = profile.map((row) => cleanFormat(row));
     window.backend.Drill.WriteProfile(cleanProfile).then((result) => {
-      console.log(result)
+      console.log(result);
     });
   };
 
@@ -45,13 +45,15 @@ export default function HelloWorld() {
       setTimeout(() => {
         resolve();
         if (oldData) {
-          const data = [...profile];          
+          const data = [...profile];
           data[data.indexOf(oldData)] = cleanFormat(newData);
-          console.log(cleanFormat(newData))
+          console.log(cleanFormat(newData));
           setProfile(data);
-          window.backend.Drill.WriteParam(cleanFormat(newData)).then((result) => {
-            console.log(result)
-          });
+          window.backend.Drill.WriteParam(cleanFormat(newData)).then(
+            (result) => {
+              console.log(result);
+            }
+          );
         }
       }, 600);
     });
@@ -59,47 +61,54 @@ export default function HelloWorld() {
   return (
     <div className="App">
       <Grid container spacing={3}>
-        <Grid item xs={3}>
+        <Grid item xs={2} style={{ minWidth: "300px" }}>
           <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <InfoCard />
-          </Grid>
-          <Grid item xs={12}>
-            <Paper>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Button
-                    onClick={handleRead}
-                    variant="contained"
-                    color="primary"
-                  >
-                    Read
-                  </Button>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button onClick={handleWrite} variant="contained" color="primary">
-                    Write
-                  </Button>
-                </Grid>
-              </Grid>
-            </Paper>
-          </Grid>
+            <Grid item xs={12}>
+              <InfoCard />
+            </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={3}>
+        <Grid
+          item
+          xs={4}
+          style={{
+            minWidth: "300px",
+          }}
+        >
           <ParamTable
             id="unique"
             title="Clockwise"
-            params={profile.slice(0,12)}
+            params={profile.slice(0, 12)}
             handleRowUpdate={rowUpdateHandler}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid
+          item
+          xs={4}
+          style={{
+            minWidth: "300px",
+          }}
+        >
           <ParamTable
             title="Counterclockwise"
-            params={profile.slice(12,24)}
+            params={profile.slice(12, 24)}
             handleRowUpdate={rowUpdateHandler}
           />
+        </Grid>
+        <Grid item xs={1}>
+          <Paper>
+            <Grid container spacing={0}>
+              <Grid item xs={12}>
+                <Button
+                  onClick={handleRead}
+                  variant="contained"
+                  color="primary"
+                >
+                  Read
+                </Button>
+              </Grid>
+            </Grid>
+          </Paper>
         </Grid>
       </Grid>
     </div>
