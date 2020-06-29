@@ -1,6 +1,5 @@
 import React, { forwardRef } from "react";
 import MaterialTable from "material-table";
-import NumericInput from 'react-numeric-input';
 import TextField from "@material-ui/core/TextField";
 import Check from "@material-ui/icons/Check";
 import Clear from "@material-ui/icons/Clear";
@@ -45,9 +44,9 @@ export default function ParamTable(props) {
       editComponent: (props) => {
         return (
           <TextField
-            style={{
-              maxWidth: "100px",
-            }}
+            // style={{
+            //   maxWidth: "100px",
+            // }}
             value={props.value}
             type="number"
             color="secondary"
