@@ -12,11 +12,9 @@ export default function UIntInput(props) {
       min={0}
       max={65535}
       step={1}
-      // style={{
-      //   "input:not(.form-control)": {
-      //     border: "none",
-      //   }
-      // }}
+      style={{
+        maxWidth: "55px"
+      }}
     />
   );
 }
