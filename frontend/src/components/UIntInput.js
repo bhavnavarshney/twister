@@ -1,23 +1,22 @@
 import React from "react";
-import NumericInput from "react-numeric-input";
+import InputNumber from 'rc-input-number';
 
 export default function UIntInput(props) {
   const { inputRef, ...other } = props;
   return (
-    <NumericInput
+    <InputNumber
       ref={(ref) => {
         inputRef(ref ? ref.inputElement : null);
       }}
       {...other}
-      strict
       min={0}
       max={65535}
       step={1}
-      style={{
-        "input:not(.form-control)": {
-          border: "none",
-        }
-      }}
+      // style={{
+      //   "input:not(.form-control)": {
+      //     border: "none",
+      //   }
+      // }}
     />
   );
 }
