@@ -10,11 +10,10 @@
     "@wailsapp/runtime": "^1.0.10",
     "core-js": "^3.6.4",
     "material-table": "^1.62.0",
+    "rc-input-number": "^5.1.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-modal": "3.11.2",
-    "react-number-format": "^4.4.1",
-    "react-numeric-input": "^2.2.3",
     "wails-react-scripts": "3.0.1-2"
   },
   "scripts": {
