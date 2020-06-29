@@ -5,6 +5,7 @@ import TextField from "@material-ui/core/TextField";
 import Check from "@material-ui/icons/Check";
 import Clear from "@material-ui/icons/Clear";
 import Edit from "@material-ui/icons/Edit";
+import UIntInput from "./UIntInput"
 
 const tableIcons = {
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
@@ -23,15 +24,15 @@ export default function ParamTable(props) {
       editComponent: (props) => {
         return (
           <TextField
-            Inputref={{NumericInput}}
             style={{
-              maxWidth: "120px",
+              maxWidth: "100px",
             }}
             value={props.value}
             type="number"
             color="secondary"
-            onChange={(e) => props.onChange(e.target.value)}
-            InputProps={{ inputComponent: NumericInput, inputProps:{min: "0", max: "65535", step: "1"} }}
+            variant="outlined"
+            onChange={(e) => props.onChange(e)}
+            InputProps={{ inputComponent: UIntInput}}
           />
         );
       },
@@ -45,13 +46,14 @@ export default function ParamTable(props) {
         return (
           <TextField
             style={{
-              maxWidth: "120px",
+              maxWidth: "100px",
             }}
             value={props.value}
             type="number"
             color="secondary"
-            onChange={(e) => props.onChange(e.target.value)}
-            InputProps={{ inputComponent: NumericInput, inputProps:{min: "0", max: "65535", step: "1"} }}
+            variant="outlined"
+            onChange={(e) => props.onChange(e)}
+            InputProps={{ inputComponent: UIntInput}}
           />
         );
       },

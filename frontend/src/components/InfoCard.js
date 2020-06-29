@@ -9,6 +9,7 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import NumericInput from "react-numeric-input";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import UIntInput from "./UIntInput"
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -59,15 +60,11 @@ export default function InfoCard(props) {
         <Tooltip placement="right" title="Find this using Device Manager">
           <TextField
             onChange={props.handleSetPort}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">COM</InputAdornment>
-              ),
-              inputComponent: NumericInput,
-              inputProps: { min: "0", max: "65535", step: "1" },
-            }}
+            value={props.port}
+            InputProps={{ startAdornment:(<InputAdornment position="start">COM</InputAdornment>), inputComponent: UIntInput}}
             type="number"
             style={{ padding: "15px" }}
+            variant="outlined"
             label="Device Port"
             color="secondary"
             defaultValue="3"
