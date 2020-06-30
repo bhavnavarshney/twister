@@ -25,7 +25,7 @@ function cleanFormat(rowData) {
 export default function HelloWorld() {
   const [showSnackBar, setShowSnackBar] = React.useState({message: "", severity: "info"});
   const [info, setInfo] = React.useState({});
-  const [port, setPort] = React.useState("COM3");
+  const [port, setPort] = React.useState(3);
   const [profile, setProfile] = React.useState([]);
 
   const handleClose = () => {
