@@ -25,6 +25,9 @@ type Drill struct {
 }
 
 func (dr *Drill) Open(portName string) (string, error) {
+	if dr.driver != nil {
+		dr.driver.Port.Close()
+	}
 	config := &serial.Config{Name: portName, Baud: 9600, ReadTimeout: time.Second * 2}
 	var mock bool
 	if portName == "COM999" {
