@@ -1,8 +1,9 @@
-import React from "react";
+import React, {useEffect} from "react";
 import Grid from "@material-ui/core/Grid";
 import InfoCard from "./InfoCard";
 import ParamTable from "./ParamTable";
 import SnackBar from "./SnackBar";
+import Wails from "@wailsapp/runtime"
 
 function mapFieldsToProfile(fields) {
   return fields.map((item, index) => {
@@ -25,11 +26,20 @@ function cleanFormat(rowData) {
 export default function HelloWorld() {
   const [showSnackBar, setShowSnackBar] = React.useState({message: "", severity: "info"});
   const [info, setInfo] = React.useState({});
+  const [currentOffset, setCurrentOffset] = React.useState(null);
   const [port, setPort] = React.useState(3);
   const [profile, setProfile] = React.useState([]);
 
+  useEffect(() => {
+    Wails.Events.On("CurrentOffset", message => {
+      setCurrentOffset(message)
+    });
+  }, []);
+
+
   const handleClose = () => {
     window.backend.Drill.Close().then((result) => {
+      setCurrentOffset(null)
       setInfo({})
       setProfile([])
       setShowSnackBar({message: "Closed", severity: "success"})
@@ -53,6 +63,7 @@ export default function HelloWorld() {
      setShowSnackBar({message: "Drill Connected", severity: "success"})
       window.backend.Drill.GetInfo().then((result) => {
         setInfo(result)
+        setCurrentOffset(result.CurrentOffset)
         window.backend.Drill.GetProfile().then((result) => {
           const newProfile = mapFieldsToProfile(result.Fields);
           setProfile(newProfile);
@@ -100,7 +111,7 @@ export default function HelloWorld() {
         <Grid item xs={2} style={{ minWidth: "300px" }}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <InfoCard data={info} handleOpen={handleRead} handleClose={handleClose} handleSetPort={handleSetPort}/>
+              <InfoCard data={info} currentOffset={currentOffset} handleOpen={handleRead} handleClose={handleClose} handleSetPort={handleSetPort}/>
             </Grid>
           </Grid>
         </Grid>

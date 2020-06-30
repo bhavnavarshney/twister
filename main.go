@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
@@ -16,12 +17,58 @@ import (
 )
 
 type Drill struct {
+	sync.Mutex
+	quit             chan struct{}
+	runtime          *wails.Runtime
 	driver           *serialport.Driver
 	profile          profile.Profile
 	calibratedOffset uint16 // Indicates the zero value for the sensor
 	currentOffset    uint16 // Indicates the current zero value for the sensor, we need to poll this every second
 	info             string
 	log              *logrus.Logger
+}
+
+func (dr *Drill) WailsInit(runtime *wails.Runtime) error {
+	dr.runtime = runtime
+	return nil
+}
+
+// Poll the current offset every second, and send it to the frontend
+func (dr *Drill) PollCurrentOffset() {
+	ticker := time.NewTicker(1 * time.Second)
+	dr.quit = make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				offset, _ := dr.GetCurrentOffset()
+				dr.runtime.Events.Emit("CurrentOffset", offset)
+			case <-dr.quit:
+				ticker.Stop()
+			}
+		}
+	}()
+}
+
+func (dr *Drill) GetCurrentOffset() (uint16, error) {
+	dr.Mutex.Lock()
+	defer dr.Mutex.Unlock()
+	if dr.driver == nil {
+		return 0, errors.New("Port not open")
+	}
+
+	currentOffsetCommand := serialport.MakeCommand(message.CurrentOffsetMsg, message.CurrentOffsetMsgLen)
+	response, err := dr.driver.SendCommand(currentOffsetCommand)
+	if err != nil {
+		return 0, err
+	}
+	currentOffset := message.Offset{}
+	err = currentOffset.Unmarshal(response)
+	if err != nil {
+		return 0, err
+	}
+
+	return currentOffset.ToUInt16(), nil
 }
 
 func (dr *Drill) Open(portName string) (string, error) {
@@ -50,6 +97,8 @@ func (dr *Drill) Close() (string, error) {
 	if dr.driver == nil {
 		return "", errors.New("Port not open")
 	}
+	// Close quit to signal termination of polling goroutine
+	close(dr.quit)
 	err := dr.driver.Port.Close()
 	if err != nil {
 		return "", err
@@ -66,6 +115,8 @@ type Info struct {
 }
 
 func (dr *Drill) GetInfo() (Info, error) {
+	dr.Mutex.Lock()
+	defer dr.Mutex.Unlock()
 	drillTypeCommand := serialport.MakeCommand(message.DrillTypeMsg, message.DrillTypeMsgLen)
 	response, err := dr.driver.SendCommand(drillTypeCommand)
 	if err != nil {
@@ -110,6 +161,9 @@ func (dr *Drill) GetInfo() (Info, error) {
 		return Info{}, err
 	}
 
+	// Poll for current offset every second
+	dr.PollCurrentOffset()
+
 	return Info{
 		DrillType:        drillType.ToString(),
 		DrillID:          drillID.ToString(),
@@ -119,6 +173,8 @@ func (dr *Drill) GetInfo() (Info, error) {
 }
 
 func (dr *Drill) WriteParam(p map[string]interface{}) (string, error) {
+	dr.Mutex.Lock()
+	defer dr.Mutex.Unlock()
 	if dr.driver == nil {
 		return "", errors.New("Port has not been opened")
 	}
@@ -137,6 +193,8 @@ func (dr *Drill) WriteParam(p map[string]interface{}) (string, error) {
 }
 
 func (dr *Drill) GetProfile() (profile.Profile, error) {
+	dr.Mutex.Lock()
+	defer dr.Mutex.Unlock()
 	if dr.driver == nil {
 		return profile.Profile{}, errors.New("Port has not been opened")
 	}
@@ -161,6 +219,8 @@ func (dr *Drill) GetProfile() (profile.Profile, error) {
 }
 
 func (dr *Drill) WriteProfile(p []interface{}) (string, error) {
+	dr.Mutex.Lock()
+	defer dr.Mutex.Unlock()
 	for i := range p {
 		dr.profile.Fields[i].Torque = uint16(p[i].(map[string]interface{})["Torque"].(float64))
 		dr.profile.Fields[i].AD = uint16(p[i].(map[string]interface{})["AD"].(float64))
