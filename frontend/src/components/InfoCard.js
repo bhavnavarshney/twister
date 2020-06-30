@@ -41,7 +41,7 @@ export default function InfoCard(props) {
     createData("Drill ID", props.data.DrillID),
     createData("Drill Type", props.data.DrillType),
     createData("Calibrated Offset", props.data.CalibratedOffset),
-    createData("Current Offset", props.data.CurrentOffset),
+    createData("Current Offset", props.currentOffset ),
     createData("Status", !props.data.DrillID? "Not Connected":"Connected"),
   ];
 
