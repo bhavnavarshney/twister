@@ -1,6 +1,5 @@
 import React, { forwardRef } from "react";
 import MaterialTable from "material-table";
-import TextField from "@material-ui/core/TextField";
 import Check from "@material-ui/icons/Check";
 import Clear from "@material-ui/icons/Clear";
 import Edit from "@material-ui/icons/Edit";
@@ -19,40 +18,12 @@ export default function ParamTable(props) {
       field: "Torque",
       type: "numeric",
       cellStyle:{textAlign:"left"}, headerStyle:{textAlign:"left"},
-      editComponent: (props) => {
-        return (
-          <TextField
-            style={{
-              maxWidth: "120px",
-            }}
-            value={props.value}
-            type="number"
-            color="secondary"
-            onChange={(e) => props.onChange(e.target.value)}
-            inputProps={{ min: "0", max: "65535", step: "1" }}
-          />
-        );
-      },
     },
     {
       title: "AD",
       field: "AD",
       type: "numeric",
       cellStyle:{textAlign:"left"}, headerStyle:{textAlign:"left"},
-      editComponent: (props) => {
-        return (
-          <TextField
-            style={{
-              maxWidth: "120px",
-            }}
-            value={props.value}
-            type="number"
-            color="secondary"
-            onChange={(e) => props.onChange(e.target.value)}
-            inputProps={{ min: "0", max: "65535", step: "1" }}
-          />
-        );
-      },
     },
   ];
   return (
