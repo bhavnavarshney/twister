@@ -1,8 +1,8 @@
 import React, {useEffect} from "react";
+import { useSnackbar } from 'notistack';
 import Grid from "@material-ui/core/Grid";
 import InfoCard from "./InfoCard";
 import ParamTable from "./ParamTable";
-import SnackBar from "./SnackBar";
 import Wails from "@wailsapp/runtime"
 
 function mapFieldsToProfile(fields) {
@@ -24,11 +24,26 @@ function cleanFormat(rowData) {
 }
 
 export default function HelloWorld() {
-  const [showSnackBar, setShowSnackBar] = React.useState({message: "", severity: "info"});
   const [info, setInfo] = React.useState({});
   const [currentOffset, setCurrentOffset] = React.useState(null);
   const [port, setPort] = React.useState(3);
   const [profile, setProfile] = React.useState([]);
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+
+  const infoSnackBarOptions = {variant: "info", autoHideDuration:3000, anchorOrigin:{
+    vertical: "bottom",
+    horizontal: "right",
+  }}
+  
+  const errorSnackBarOptions = {variant: "error", anchorOrigin:{
+    vertical: "bottom",
+    horizontal: "right",
+  }}
+
+  const successSnackBarOptions = {variant: "success", autoHideDuration:3000, anchorOrigin:{
+    vertical: "bottom",
+    horizontal: "right",
+  }}
 
   useEffect(() => {
     Wails.Events.On("CurrentOffset", message => {
@@ -42,25 +57,18 @@ export default function HelloWorld() {
       setCurrentOffset(null)
       setInfo({})
       setProfile([])
-      setShowSnackBar({message: "Closed", severity: "success"})
-      console.log(result)
+      enqueueSnackbar("Closed")
     }).catch((err)=> {
-      console.log(err)
+      enqueueSnackbar("Error Closing port:" + err, infoSnackBarOptions)
     });
   }
-  const handleCloseSnackBar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setShowSnackBar({message: "", severity: "info"});
-  };
 
   const handleSetPort = (e) => {
     setPort(e.target.value)
   }
   const handleRead = () => {
     window.backend.Drill.Open("COM" + port.toString()).then((result)=>{
-     setShowSnackBar({message: "Drill Connected", severity: "success"})
+      enqueueSnackbar("Drill Connected", successSnackBarOptions)
       window.backend.Drill.GetInfo().then((result) => {
         setInfo(result)
         setCurrentOffset(result.CurrentOffset)
@@ -70,10 +78,10 @@ export default function HelloWorld() {
         });
       }).catch((err)=>{
         console.log(err)
-        setShowSnackBar({message: "Error getting info" + err, severity: "error"})
+        enqueueSnackbar("Error getting info" + err, errorSnackBarOptions);
       });
     }).catch((err)=>{
-      setShowSnackBar({message: "Error connecting: "+err, severity: "error"})
+      enqueueSnackbar("Error connecting: "+err, errorSnackBarOptions);
     })
     
 
@@ -96,10 +104,10 @@ export default function HelloWorld() {
           setProfile(data);
           window.backend.Drill.WriteParam(cleanFormat(newData)).then(
             (result) => {
-              setShowSnackBar({message: "Parameter Saved", severity: "success"})
+              enqueueSnackbar("Parameter Saved", successSnackBarOptions);
             }
           ).catch((err)=>{
-            setShowSnackBar({message: "Error saving:" + err, severity: "error"})
+            enqueueSnackbar("Error saving:" + err);
           });
         }
       }, 600);
@@ -143,7 +151,6 @@ export default function HelloWorld() {
           />
         </Grid>
       </Grid>
-      <SnackBar message={showSnackBar.message} severity={showSnackBar.severity} handleClose = {handleCloseSnackBar}/>
     </div>
   );
 }
