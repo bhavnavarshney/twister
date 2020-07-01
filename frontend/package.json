@@ -6,10 +6,10 @@
   "dependencies": {
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.56",
     "@wailsapp/runtime": "^1.0.10",
     "core-js": "^3.6.4",
     "material-table": "^1.62.0",
+    "notistack": "^0.9.17",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-modal": "3.11.2",
