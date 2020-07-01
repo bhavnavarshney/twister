@@ -28,7 +28,7 @@ export default function HelloWorld() {
   const [currentOffset, setCurrentOffset] = React.useState(null);
   const [port, setPort] = React.useState(3);
   const [profile, setProfile] = React.useState([]);
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+  const { enqueueSnackbar } = useSnackbar()
 
   const infoSnackBarOptions = {variant: "info", autoHideDuration:3000, anchorOrigin:{
     vertical: "bottom",
