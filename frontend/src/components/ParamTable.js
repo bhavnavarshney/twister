@@ -1,5 +1,6 @@
 import React, { forwardRef } from "react";
 import MaterialTable from "material-table";
+import TextField from "@material-ui/core/TextField"
 import Check from "@material-ui/icons/Check";
 import Clear from "@material-ui/icons/Clear";
 import Edit from "@material-ui/icons/Edit";
@@ -28,6 +29,16 @@ export default function ParamTable(props) {
   ];
   return (
     <MaterialTable
+    components={{
+      EditField:(props)=>( <TextField
+        style={
+          { float: "right" }
+        }
+        type="number"
+        value={props.value === undefined ? "" : props.value}
+        onChange={(event) => props.onChange(event.target.value)}
+      />)
+    }}
       options={{
         search: false,
         sorting: false,
