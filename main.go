@@ -41,8 +41,12 @@ func (dr *Drill) PollCurrentOffset() {
 		for {
 			select {
 			case <-ticker.C:
-				offset, _ := dr.GetCurrentOffset()
-				dr.runtime.Events.Emit("CurrentOffset", offset)
+				offset, err := dr.GetCurrentOffset()
+				if err != nil {
+					dr.log.Errorln(err)
+				} else {
+					dr.runtime.Events.Emit("CurrentOffset", offset)
+				}
 			case <-dr.quit:
 				ticker.Stop()
 			}
