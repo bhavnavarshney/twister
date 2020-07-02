@@ -4,7 +4,8 @@ import Tooltip from "@material-ui/core/Tooltip";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import Button from "@material-ui/core/Button";
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -44,6 +45,14 @@ export default function InfoCard(props) {
     createData("Current Offset", props.currentOffset ),
     createData("Status", !props.data.DrillID? "Not Connected":"Connected"),
   ];
+
+  const handleSwitch = () =>{
+    if (props.isConnected) {
+      props.handleClose()
+    } else {
+      props.handleOpen()
+    }
+  }
 
   return (
     <Card className={classes.root}>
@@ -88,16 +97,16 @@ export default function InfoCard(props) {
         </Table>
       </CardContent>
       <CardActions>
-        <Button variant="contained" color="primary" onClick={props.handleOpen}>
-          Open
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={props.handleClose}
-        >
-          Close
-        </Button>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={props.isConnected}
+            onChange={handleSwitch}
+            color="primary"
+          />
+        }
+        label="Connect"
+      />
       </CardActions>
     </Card>
   );

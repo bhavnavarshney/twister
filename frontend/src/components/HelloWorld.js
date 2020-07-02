@@ -28,6 +28,7 @@ export default function HelloWorld() {
   const [currentOffset, setCurrentOffset] = React.useState(null);
   const [port, setPort] = React.useState(3);
   const [profile, setProfile] = React.useState([]);
+  const [isConnected, setIsConnected] = React.useState(false);
   const { enqueueSnackbar } = useSnackbar()
 
   const infoSnackBarOptions = {variant: "info", autoHideDuration:3000, anchorOrigin:{
@@ -57,9 +58,11 @@ export default function HelloWorld() {
       setCurrentOffset(null)
       setInfo({})
       setProfile([])
-      enqueueSnackbar("Closed")
+      enqueueSnackbar("Closed", infoSnackBarOptions)
+      setIsConnected(false)
     }).catch((err)=> {
       enqueueSnackbar("Error Closing port:" + err, infoSnackBarOptions)
+      setIsConnected(false)
     });
   }
 
@@ -75,6 +78,7 @@ export default function HelloWorld() {
         window.backend.Drill.GetProfile().then((result) => {
           const newProfile = mapFieldsToProfile(result.Fields);
           setProfile(newProfile);
+          setIsConnected(true)
         });
       }).catch((err)=>{
         console.log(err)
@@ -119,7 +123,7 @@ export default function HelloWorld() {
         <Grid item xs={2} style={{ minWidth: "300px" }}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <InfoCard data={info} currentOffset={currentOffset} handleOpen={handleRead} handleClose={handleClose} handleSetPort={handleSetPort}/>
+              <InfoCard isConnected={isConnected} data={info} currentOffset={currentOffset} handleOpen={handleRead} handleClose={handleClose} handleSetPort={handleSetPort}/>
             </Grid>
           </Grid>
         </Grid>
