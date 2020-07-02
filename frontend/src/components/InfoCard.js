@@ -5,6 +5,7 @@ import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -96,10 +97,16 @@ export default function InfoCard(props) {
         </Table>
       </CardContent>
       <CardActions>
-        <Switch
-          checked={props.isConnected}
-          onChange={handleSwitch}
-        />
+      <FormControlLabel
+        control={
+          <Switch
+            checked={props.isConnected}
+            onChange={handleSwitch}
+            color="primary"
+          />
+        }
+        label="Connect"
+      />
       </CardActions>
     </Card>
   );
