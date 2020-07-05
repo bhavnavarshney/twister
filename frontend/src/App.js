@@ -5,7 +5,7 @@ import HelloWorld from './components/HelloWorld';
 
 function App() {
   return (
-    <SnackbarProvider>
+    <SnackbarProvider maxSnack={1}>
     <div id="app" className="App">
        <HelloWorld />
     </div>
