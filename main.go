@@ -86,7 +86,7 @@ func (dr *Drill) Open(portName string) (string, error) {
 	}
 	p, err := serialport.MakeSerialPort(config, mock)
 	if err != nil {
-		return "", err
+		return "", errors.New("Serial port error. Please check your port number and connection.")
 	}
 	dr.driver = serialport.MakeDriver(p, dr.log)
 	ok := dr.driver.SendKeepAlive()
