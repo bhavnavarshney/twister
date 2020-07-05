@@ -205,13 +205,13 @@ func (dr *Drill) GetProfile() (profile.Profile, error) {
 	readProfileCommand := serialport.MakeCommand(message.BulkParamReceiveMsg, message.BulkParamReceiveMsgLen)
 	response, err := dr.driver.SendCommand(readProfileCommand)
 	if err != nil {
-		panic(err)
+		return profile.Profile{}, err
 	}
 
 	torqueData := message.TorqueData{}
 	err = torqueData.Unmarshal(response)
 	if err != nil {
-		panic(err)
+		return profile.Profile{}, err
 	}
 	fmt.Printf("Torque Data Hex: %X", torqueData.ToByte())
 	int16Data := message.ToUInt16(torqueData.ToByte())

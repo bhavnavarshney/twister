@@ -74,6 +74,8 @@ func (sp *Driver) SendMessage(m Message) error {
 	}(ctx)
 
 	select {
+	case errMsg := <-errResp:
+		return errMsg
 	case <-result:
 		sp.Log.Printf("Received expected response %X", m.Response())
 		return nil
@@ -94,7 +96,7 @@ func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 	errResp := make(chan error, 1)
 	var received []byte
 	bytesReceived := 0
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	go func(ctx context.Context) {
 		for {
@@ -131,9 +133,9 @@ func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 	select {
 	case <-errResp:
 		return nil, errors.New("error reading from serial port")
-	case <-result:
-		sp.Log.Printf("Received expected response %X", m.Response())
-		return received, nil
+	case resultVal := <-result:
+		sp.Log.Printf("Received expected response %X", resultVal)
+		return resultVal, nil
 	case <-ctx.Done():
 		return nil, errors.New("timeout waiting for response")
 	}
@@ -216,7 +218,7 @@ func (sp *Driver) SendKeepAlive() bool {
 func (sp *Driver) write(out []byte) (int, error) {
 	n, err := sp.Port.Write(out)
 	if err != nil {
-		sp.Log.Fatal(err)
+		sp.Log.Warningln(err)
 		return n, err
 	}
 	sp.Log.Printf("wrote %d bytes", n)
@@ -228,11 +230,12 @@ func (sp *Driver) write(out []byte) (int, error) {
 // Wrap read for easier debugging
 func (sp *Driver) read(b []byte) (int, error) {
 	n, err := sp.Port.Read(b)
+	if err != nil {
+		sp.Log.Warningln(err)
+		return n, err
+	}
 	sp.Log.Printf("read %d bytes", n)
 	sp.Log.Printf("read %X", b)
-	if err != nil {
-		sp.Log.Fatal(err)
-	}
 	return n, err
 }
 
