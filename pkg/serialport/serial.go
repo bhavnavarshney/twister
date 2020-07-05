@@ -2,6 +2,8 @@ package serialport
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -48,29 +50,35 @@ func (sp *Driver) SendMessage(m Message) error {
 		return err
 	}
 
-	bytesReceived := 0
-	buf := make([]byte, m.ResponseLen())
-	for bytesReceived < m.ResponseLen() {
-		numBytesRead, err := sp.read(buf)
-		sp.Log.Printf("Read %d bytes from port", numBytesRead)
-		sp.Log.Printf("Received response: %d", buf[:numBytesRead])
-		if err != nil {
-			return fmt.Errorf("error reading from port: %w", err)
+	result := make(chan []byte, 1)
+	errResp := make(chan error, 1)
+	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	go func(ctx context.Context) {
+		for {
+			buf := make([]byte, m.ResponseLen())
+			numBytesRead, err := sp.read(buf)
+			sp.Log.Printf("Read %d bytes from port", numBytesRead)
+			sp.Log.Printf("Received response: %d", buf[:numBytesRead])
+			if err != nil {
+				errResp <- fmt.Errorf("error reading from port: %w", err)
+				return
+			}
+			if bytes.Contains(buf, m.Response()) {
+				result <- buf
+				return
+			} else {
+				sp.Log.Warnf("Expected %X but received %X", m.Response(), buf)
+			}
 		}
-		if bytes.Contains(buf, m.Response()) {
-			bytesReceived += numBytesRead
-			sp.Log.Printf("Received expected response %X", m.Response())
-		} else {
-			sp.Log.Warnf("Expected %X but received %X", m.Response(), buf)
-		}
+	}(ctx)
+
+	select {
+	case <-result:
+		sp.Log.Printf("Received expected response %X", m.Response())
+	case <-ctx.Done():
+		return errors.New("timeout waiting for response")
 	}
 
-	// // If there's an expected response, check it
-	// if len(m.Response()) > 0 && !bytes.Equal(m.Response(), buf) {
-	// 	// Retry, bump retry count
-	// 	//return sp.SendMessage(m)
-	// 	return fmt.Errorf("Expected %X but received %X", m.Response(), buf)
-	// }
 	return nil
 }
 
