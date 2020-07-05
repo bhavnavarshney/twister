@@ -114,7 +114,7 @@ export default function HelloWorld() {
               enqueueSnackbar("Parameter Saved", successSnackBarOptions);
             }
           ).catch((err)=>{
-            enqueueSnackbar("Error saving:" + err);
+            enqueueSnackbar("Error saving:" + err, errorSnackBarOptions);
           });
         }
       }, 600);
