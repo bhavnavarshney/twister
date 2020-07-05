@@ -52,7 +52,8 @@ func (sp *Driver) SendMessage(m Message) error {
 
 	result := make(chan []byte, 1)
 	errResp := make(chan error, 1)
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
 	go func(ctx context.Context) {
 		for {
 			buf := make([]byte, m.ResponseLen())
@@ -75,11 +76,10 @@ func (sp *Driver) SendMessage(m Message) error {
 	select {
 	case <-result:
 		sp.Log.Printf("Received expected response %X", m.Response())
+		return nil
 	case <-ctx.Done():
 		return errors.New("timeout waiting for response")
 	}
-
-	return nil
 }
 
 // Commands receive a full payload response
@@ -90,34 +90,53 @@ func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 		return nil, err
 	}
 
-	bytesReceived := 0
+	result := make(chan []byte, m.ResponseLen())
+	errResp := make(chan error, 1)
 	var received []byte
-	for bytesReceived < m.ResponseLen() {
-		fmt.Printf("reading %d bytes out of %d expected", bytesReceived, m.ResponseLen())
-		buf := make([]byte, 50)
-		numBytesRead, err := sp.read(buf)
-		fmt.Printf("reading %d bytes", numBytesRead)
-		if err != nil {
-			return nil, fmt.Errorf("error reading from port: %w", err)
-		}
+	bytesReceived := 0
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	go func(ctx context.Context) {
+		for {
+			buf := make([]byte, 50)
+			numBytesRead, err := sp.read(buf)
+			fmt.Printf("reading %d bytes", numBytesRead)
+			if err != nil {
+				errResp <- fmt.Errorf("error reading from port: %w", err)
+				return
+			}
 
-		// already have header
-		if len(received) > 0 && (received[0] == byte(0x21)) {
-			bytesReceived += numBytesRead
-			fmt.Println(received)
-			received = append(received, buf[:numBytesRead]...)
-		} else {
-			// waiting for header
-			if startIndex := bytes.Index(buf, []byte{0x21}); startIndex != -1 {
-				fmt.Println("Header detected")
-				receiveData := buf[startIndex:numBytesRead]
-				bytesReceived += len(receiveData)
-				received = append(received, receiveData...)
+			// already have header
+			if len(received) > 0 && (received[0] == byte(0x21)) {
+				bytesReceived += numBytesRead
+				fmt.Println(received)
+				received = append(received, buf[:numBytesRead]...)
+			} else {
+				// waiting for header
+				if startIndex := bytes.Index(buf, []byte{0x21}); startIndex != -1 {
+					fmt.Println("Header detected")
+					receiveData := buf[startIndex:numBytesRead]
+					bytesReceived += len(receiveData)
+					received = append(received, receiveData...)
+				}
+			}
+
+			if len(received) == m.ResponseLen() {
+				result <- received
+				return
 			}
 		}
-	}
+	}(ctx)
 
-	return received, nil
+	select {
+	case <-errResp:
+		return nil, errors.New("error reading from serial port")
+	case <-result:
+		sp.Log.Printf("Received expected response %X", m.Response())
+		return received, nil
+	case <-ctx.Done():
+		return nil, errors.New("timeout waiting for response")
+	}
 }
 
 func MakeCommand(dataInfo byte, responseLen int) *Command {
