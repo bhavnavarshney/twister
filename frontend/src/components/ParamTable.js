@@ -4,6 +4,7 @@ import TextField from "@material-ui/core/TextField";
 import Check from "@material-ui/icons/Check";
 import Clear from "@material-ui/icons/Clear";
 import Edit from "@material-ui/icons/Edit";
+import { Typography, Paper } from "@material-ui/core";
 
 const tableIcons = {
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
@@ -18,25 +19,26 @@ export default function ParamTable(props) {
       field: "ID",
       type: "numeric",
       editable: "never",
-      cellStyle: { textAlign: "left", fontWeight: "400" },
-      headerStyle: { textAlign: "left" },
+      cellStyle: { textAlign: "left", fontWeight: "bold" },
     },
     {
       title: "Torque",
       field: "Torque",
       type: "numeric",
       cellStyle: { textAlign: "left" },
-      headerStyle: { textAlign: "left" },
     },
     {
       title: "AD",
       field: "AD",
       type: "numeric",
       cellStyle: { textAlign: "left" },
-      headerStyle: { textAlign: "left" },
     },
   ];
   return (
+    <Paper>
+      <Typography variant="h5" color="primary" gutterBottom>
+        {props.title}
+      </Typography>
     <MaterialTable
       components={{
         EditField: (props) => (
@@ -52,13 +54,13 @@ export default function ParamTable(props) {
         search: false,
         sorting: false,
         paging: false,
-        toolbar: true,
+        toolbar: false,
         showFirstLastPageButtons: false,
         actionsColumnIndex: -1,
+        headerStyle: { textAlign: "left", fontWeight:"bold" },
       }}
       icons={tableIcons}
       localization={{ pagination: { labelRowsPerPage: "12" } }}
-      title={props.title}
       columns={columns}
       data={props.params}
       editable={{
@@ -67,5 +69,6 @@ export default function ParamTable(props) {
         onRowUpdate: props.handleRowUpdate,
       }}
     />
+    </Paper>
   );
 }

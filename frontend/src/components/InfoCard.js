@@ -1,5 +1,5 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -13,6 +13,18 @@ import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
+
+const StyledLabelTableCell = withStyles((theme) => ({
+  body: {
+    fontWeight: "bold",
+  },
+}))(TableCell);
+
+const StyledDataTableCell = withStyles((theme) => ({
+  body: {
+    textAlign: "right",
+  },
+}))(TableCell);
 
 const useStyles = makeStyles({
   root: {
@@ -29,7 +41,8 @@ const useStyles = makeStyles({
   pos: {
     marginBottom: 12,
   },
-  table: {},
+  table: {
+  },
 });
 
 function createData(name, field) {
@@ -87,10 +100,10 @@ export default function InfoCard(props) {
           <TableBody>
             {rows.map((row) => (
               <TableRow key={row.name}>
-                <TableCell component="th" scope="row">
+                <StyledLabelTableCell component="th" scope="row">
                   {row.name}
-                </TableCell>
-                <TableCell align="right">{row.field}</TableCell>
+                </StyledLabelTableCell>
+                <StyledDataTableCell>{row.field}</StyledDataTableCell>
               </TableRow>
             ))}
           </TableBody>
