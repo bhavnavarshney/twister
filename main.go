@@ -35,7 +35,7 @@ func (dr *Drill) WailsInit(runtime *wails.Runtime) error {
 
 // Poll the current offset every second, and send it to the frontend
 func (dr *Drill) PollCurrentOffset() {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 	dr.quit = make(chan struct{})
 	go func() {
 		for {

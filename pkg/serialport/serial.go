@@ -81,7 +81,6 @@ func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	time.Sleep(100 * time.Millisecond)
 
 	bytesReceived := 0
 	var received []byte

@@ -71,6 +71,7 @@ export default function HelloWorld() {
   }
   const handleRead = () => {
     window.backend.Drill.Open("COM" + port.toString()).then((result)=>{
+      setIsConnected(true)
       enqueueSnackbar("Drill Connected", successSnackBarOptions)
       window.backend.Drill.GetInfo().then((result) => {
         setInfo(result)
@@ -83,9 +84,11 @@ export default function HelloWorld() {
       }).catch((err)=>{
         console.log(err)
         enqueueSnackbar("Error getting info" + err, errorSnackBarOptions);
+        setIsConnected(false)
       });
     }).catch((err)=>{
       enqueueSnackbar("Error connecting: "+err, errorSnackBarOptions);
+      setIsConnected(false)
     })
     
 
