@@ -21,8 +21,10 @@ export default function ParamTable(props) {
       editable: "never",
       width: 2,
       cellStyle: { textAlign: "left", fontWeight: "bold", maxWidth: 2 },
-      headerStyle: {width: 2},
-      render: props.displayInverse?(rowData) => <div>{-1*(rowData.ID-12)}</div>:null,
+      headerStyle: { width: 2, maxWidth: 2 },
+      render: props.displayInverse
+        ? (rowData) => <div>{-1 * (rowData.ID - 12)}</div>
+        : null,
     },
     {
       title: "Torque",
@@ -30,6 +32,7 @@ export default function ParamTable(props) {
       type: "numeric",
       width: 15,
       cellStyle: { textAlign: "left" },
+      headerStyle: { width: 15, maxWidth: 15 },
     },
     {
       title: "AD",
@@ -37,11 +40,17 @@ export default function ParamTable(props) {
       type: "numeric",
       width: 15,
       cellStyle: { textAlign: "left" },
+      headerStyle: { width: 15, maxWidth: 15 },
     },
   ];
   return (
-    <Paper>
-      <Typography variant="h5" color="primary" gutterBottom style={{padding:"5px"}}>
+    <Paper style={{ maxWidth: "457px" }}>
+      <Typography
+        variant="h5"
+        color="primary"
+        gutterBottom
+        style={{ padding: "5px" }}
+      >
         {props.title}
       </Typography>
       <MaterialTable
@@ -62,7 +71,7 @@ export default function ParamTable(props) {
           toolbar: false,
           showFirstLastPageButtons: false,
           actionsColumnIndex: -1,
-          headerStyle: { textAlign: "left", fontWeight: "bold", width:2, maxWidth:2},
+          headerStyle: { textAlign: "left", fontWeight: "bold" },
         }}
         icons={tableIcons}
         localization={{ pagination: { labelRowsPerPage: "12" } }}
