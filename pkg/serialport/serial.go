@@ -52,7 +52,7 @@ func (sp *Driver) SendMessage(m Message) error {
 
 	result := make(chan []byte, 1)
 	errResp := make(chan error, 1)
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	go func(ctx context.Context) {
 		for {
