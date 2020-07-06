@@ -20,6 +20,7 @@ export default function ParamTable(props) {
       type: "numeric",
       editable: "never",
       cellStyle: { textAlign: "left", fontWeight: "bold", maxWidth: "30px" },
+      render: props.displayInverse?(rowData) => <div>{-1*(rowData.ID-12)}</div>:null,
     },
     {
       title: "Torque",

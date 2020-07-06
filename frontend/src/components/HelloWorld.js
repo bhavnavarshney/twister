@@ -170,6 +170,7 @@ export default function HelloWorld() {
             title="Counterclockwise"
             params={profile.slice(12, 24)}
             handleRowUpdate={rowUpdateHandler}
+            displayInverse={true}
           />
         </Grid>
       </Grid>
