@@ -19,7 +19,7 @@ export default function ParamTable(props) {
       field: "ID",
       type: "numeric",
       editable: "never",
-      cellStyle: { textAlign: "left", fontWeight: "bold" },
+      cellStyle: { textAlign: "left", fontWeight: "bold", maxWidth: "30px" },
     },
     {
       title: "Torque",
