@@ -137,7 +137,10 @@ export default function HelloWorld() {
   return (
     <div className="App">
       <Grid container spacing={1}>
-        <Grid item>
+        <Grid           style={{
+            minWidth: "288px",
+            maxWidth: "288px",
+          }} item>
           <InfoCard
             isConnected={isConnected}
             data={info}
@@ -151,6 +154,7 @@ export default function HelloWorld() {
           item
           style={{
             minWidth: "457px",
+            maxWidth: "457px",
           }}
         >
           <ParamTable
@@ -164,12 +168,14 @@ export default function HelloWorld() {
           item
           style={{
             minWidth: "457px",
+            maxWidth: "457px",
           }}
         >
           <ParamTable
             title="Counterclockwise"
             params={profile.slice(12, 24)}
             handleRowUpdate={rowUpdateHandler}
+            displayInverse={true}
           />
         </Grid>
       </Grid>
