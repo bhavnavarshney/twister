@@ -81,8 +81,9 @@ export default function HelloWorld() {
   const handleGetCurrentOffset = () => {
     window.backend.Drill.GetCurrentOffset().then((result)=>{
       setCurrentOffset(result);
+      enqueueSnackbar("Current Offset Received", successSnackBarOptions);
     }).catch((err)=>{
-      console.log(err)
+      enqueueSnackbar("Error reading offset. Please try again.", errorSnackBarOptions);
     })
   }
 
@@ -143,7 +144,7 @@ export default function HelloWorld() {
     });
 
   return (
-    <div className="App">
+    <div className="App" style={{height:"100%"}}>
       <Grid container spacing={1}>
         <Grid           style={{
             minWidth: "288px",
