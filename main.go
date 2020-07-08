@@ -102,7 +102,7 @@ func (dr *Drill) Close() (string, error) {
 		return "", errors.New("Port not open")
 	}
 	// Close quit to signal termination of polling goroutine
-	close(dr.quit)
+	//close(dr.quit)
 	err := dr.driver.Port.Close()
 	if err != nil {
 		return "", err
