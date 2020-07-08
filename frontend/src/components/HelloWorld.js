@@ -78,6 +78,14 @@ export default function HelloWorld() {
       });
   };
 
+  const handleGetCurrentOffset = () => {
+    window.backend.Drill.GetCurrentOffset().then((result)=>{
+      setCurrentOffset(result);
+    }).catch((err)=>{
+      console.log(err)
+    })
+  }
+
   const handleSetPort = (e) => {
     setPort(e.target.value);
   };
@@ -148,6 +156,7 @@ export default function HelloWorld() {
             handleOpen={handleRead}
             handleClose={handleClose}
             handleSetPort={handleSetPort}
+            handleGetCurrentOffset={handleGetCurrentOffset}
           />
         </Grid>
         <Grid

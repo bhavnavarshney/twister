@@ -1,11 +1,12 @@
 import React from "react";
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
+import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from "@material-ui/core/Switch";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -41,8 +42,7 @@ const useStyles = makeStyles({
   pos: {
     marginBottom: 12,
   },
-  table: {
-  },
+  table: {},
 });
 
 function createData(name, field) {
@@ -55,17 +55,17 @@ export default function InfoCard(props) {
     createData("Drill ID", props.data.DrillID),
     createData("Drill Type", props.data.DrillType),
     createData("Calibrated Offset", props.data.CalibratedOffset),
-    createData("Current Offset", props.currentOffset ),
-    createData("Status", !props.data.DrillID? "Not Connected":"Connected"),
+    createData("Current Offset", props.currentOffset),
+    createData("Status", !props.data.DrillID ? "Not Connected" : "Connected"),
   ];
 
-  const handleSwitch = () =>{
+  const handleSwitch = () => {
     if (props.isConnected) {
-      props.handleClose()
+      props.handleClose();
     } else {
-      props.handleOpen()
+      props.handleOpen();
     }
-  }
+  };
 
   return (
     <Card className={classes.root}>
@@ -110,16 +110,24 @@ export default function InfoCard(props) {
         </Table>
       </CardContent>
       <CardActions>
-      <FormControlLabel
-        control={
-          <Switch
-            checked={props.isConnected}
-            onChange={handleSwitch}
-            color="primary"
-          />
-        }
-        label="Connect"
-      />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={props.isConnected}
+              onChange={handleSwitch}
+              color="primary"
+            />
+          }
+          label="Connect"
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={!props.data.DrillID}
+          onClick={props.handleGetCurrentOffset}
+        >
+          Current Offset
+        </Button>
       </CardActions>
     </Card>
   );

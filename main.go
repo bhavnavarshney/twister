@@ -166,7 +166,7 @@ func (dr *Drill) GetInfo() (Info, error) {
 	}
 
 	// Poll for current offset every second
-	dr.PollCurrentOffset()
+	//dr.PollCurrentOffset()
 
 	return Info{
 		DrillType:        drillType.ToString(),
