@@ -6,6 +6,7 @@ import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Switch from "@material-ui/core/Switch";
+import Grid from "@material-ui/core/Grid";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
@@ -110,24 +111,30 @@ export default function InfoCard(props) {
         </Table>
       </CardContent>
       <CardActions>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={props.isConnected}
-              onChange={handleSwitch}
-              color="primary"
+        <Grid container spacing={1}>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={props.isConnected}
+                  onChange={handleSwitch}
+                  color="primary"
+                />
+              }
+              label="Connect"
             />
-          }
-          label="Connect"
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={!props.data.DrillID}
-          onClick={props.handleGetCurrentOffset}
-        >
-          Current Offset
-        </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={!props.data.DrillID}
+              onClick={props.handleGetCurrentOffset}
+            >
+              Current Offset
+            </Button>
+          </Grid>
+        </Grid>
       </CardActions>
     </Card>
   );
