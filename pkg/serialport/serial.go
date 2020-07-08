@@ -54,21 +54,28 @@ func (sp *Driver) SendMessage(m Message) error {
 		if err != nil {
 			errResp <- fmt.Errorf("error writing to port: %w", err)
 		}
+		ticker := time.Tick(20 * time.Millisecond)
 		for {
-			buf := make([]byte, m.ResponseLen())
-			numBytesRead, err := sp.read(buf)
-			sp.Log.Printf("Read %d bytes from port", numBytesRead)
-			sp.Log.Printf("Received response: %d", buf[:numBytesRead])
-			if err != nil {
-				errResp <- fmt.Errorf("error reading from port: %w", err)
+			select {
+			case <-ticker:
+				buf := make([]byte, m.ResponseLen())
+				numBytesRead, err := sp.read(buf)
+				sp.Log.Printf("Read %d bytes from port", numBytesRead)
+				sp.Log.Printf("Received response: %d", buf[:numBytesRead])
+				if err != nil {
+					errResp <- fmt.Errorf("error reading from port: %w", err)
+					return
+				}
+				if bytes.Contains(buf, m.Response()) {
+					result <- buf
+					return
+				} else {
+					sp.Log.Warnf("Expected %X but received %X", m.Response(), buf)
+				}
+			case <-ctx.Done():
 				return
 			}
-			if bytes.Contains(buf, m.Response()) {
-				result <- buf
-				return
-			} else {
-				sp.Log.Warnf("Expected %X but received %X", m.Response(), buf)
-			}
+
 		}
 	}(ctx)
 
@@ -97,32 +104,38 @@ func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 		if err != nil {
 			errResp <- fmt.Errorf("error writing to port: %w", err)
 		}
+		ticker := time.Tick(20 * time.Millisecond)
 		for {
-			buf := make([]byte, 50)
-			numBytesRead, err := sp.read(buf)
-			fmt.Printf("reading %d bytes", numBytesRead)
-			if err != nil {
-				errResp <- fmt.Errorf("error reading from port: %w", err)
-				return
-			}
-
-			// already have header
-			if len(received) > 0 && (received[0] == byte(0x21)) {
-				bytesReceived += numBytesRead
-				fmt.Println(received)
-				received = append(received, buf[:numBytesRead]...)
-			} else {
-				// waiting for header
-				if startIndex := bytes.Index(buf, []byte{0x21}); startIndex != -1 {
-					fmt.Println("Header detected")
-					receiveData := buf[startIndex:numBytesRead]
-					bytesReceived += len(receiveData)
-					received = append(received, receiveData...)
+			select {
+			case <-ticker:
+				buf := make([]byte, 50)
+				numBytesRead, err := sp.read(buf)
+				fmt.Printf("reading %d bytes", numBytesRead)
+				if err != nil {
+					errResp <- fmt.Errorf("error reading from port: %w", err)
+					return
 				}
-			}
 
-			if len(received) == m.ResponseLen() {
-				result <- received
+				// already have header
+				if len(received) > 0 && (received[0] == byte(0x21)) {
+					bytesReceived += numBytesRead
+					fmt.Println(received)
+					received = append(received, buf[:numBytesRead]...)
+				} else {
+					// waiting for header
+					if startIndex := bytes.Index(buf, []byte{0x21}); startIndex != -1 {
+						fmt.Println("Header detected")
+						receiveData := buf[startIndex:numBytesRead]
+						bytesReceived += len(receiveData)
+						received = append(received, receiveData...)
+					}
+				}
+
+				if len(received) == m.ResponseLen() {
+					result <- received
+					return
+				}
+			case <-ctx.Done():
 				return
 			}
 		}
