@@ -45,16 +45,15 @@ type Driver struct {
 // Message just receive a single byte response
 // POST
 func (sp *Driver) SendMessage(m Message) error {
-	_, err := sp.write(m.Marshal())
-	if err != nil {
-		return err
-	}
-
 	result := make(chan []byte, 1)
 	errResp := make(chan error, 1)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	go func(ctx context.Context) {
+		_, err := sp.write(m.Marshal())
+		if err != nil {
+			errResp <- fmt.Errorf("error writing to port: %w", err)
+		}
 		for {
 			buf := make([]byte, m.ResponseLen())
 			numBytesRead, err := sp.read(buf)
@@ -87,11 +86,6 @@ func (sp *Driver) SendMessage(m Message) error {
 // Commands receive a full payload response
 // GET
 func (sp *Driver) SendCommand(m Message) ([]byte, error) {
-	_, err := sp.write(m.Marshal())
-	if err != nil {
-		return nil, err
-	}
-
 	result := make(chan []byte, m.ResponseLen())
 	errResp := make(chan error, 1)
 	var received []byte
@@ -99,6 +93,10 @@ func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	go func(ctx context.Context) {
+		_, err := sp.write(m.Marshal())
+		if err != nil {
+			errResp <- fmt.Errorf("error writing to port: %w", err)
+		}
 		for {
 			buf := make([]byte, 50)
 			numBytesRead, err := sp.read(buf)
