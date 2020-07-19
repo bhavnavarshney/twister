@@ -26,8 +26,11 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
+    - name: Generate Assets
+      run: go generate
+
     - name: Build Application
-      run: build-windows.bat
+      run: go build -ldflags "-H windowsgui" -o build/NPTCalibration.exe
 
     - name: Create Release
       id: create_release
