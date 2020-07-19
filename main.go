@@ -1,36 +1,32 @@
+//go:generate go run -tags generate gen.go
 package main
 
 import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
+	"net/http"
 	"sync"
 	"time"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/profile"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/serialport"
-	"github.com/leaanthony/mewn"
 	"github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
-	"github.com/wailsapp/wails"
+	"github.com/zserge/lorca"
 )
 
 type Drill struct {
 	sync.Mutex
 	quit             chan struct{}
-	runtime          *wails.Runtime
 	driver           *serialport.Driver
 	profile          profile.Profile
 	calibratedOffset uint16 // Indicates the zero value for the sensor
 	currentOffset    uint16 // Indicates the current zero value for the sensor, we need to poll this every second
 	info             string
 	log              *logrus.Logger
-}
-
-func (dr *Drill) WailsInit(runtime *wails.Runtime) error {
-	dr.runtime = runtime
-	return nil
 }
 
 // Poll the current offset every second, and send it to the frontend
@@ -45,7 +41,8 @@ func (dr *Drill) PollCurrentOffset() {
 				if err != nil {
 					dr.log.Errorln(err)
 				} else {
-					dr.runtime.Events.Emit("CurrentOffset", offset)
+					dr.log.Infoln(offset)
+					//dr.runtime.Events.Emit("CurrentOffset", offset)
 				}
 			case <-dr.quit:
 				ticker.Stop()
@@ -242,24 +239,33 @@ func (dr *Drill) WriteProfile(p []interface{}) (string, error) {
 }
 
 func main() {
-	js := mewn.String("./frontend/build/static/js/main.js")
-	css := mewn.String("./frontend/build/static/css/main.css")
-	app := wails.CreateApp(&wails.AppConfig{
-		Width:     1440,
-		Height:    900,
-		Resizable: true,
-		Title:     "NPT Calibration",
-		JS:        js,
-		CSS:       css,
-		Colour:    "#131313",
-	})
+	args := []string{}
+	args = append(args, "--start-maximized")
+	ui, err := lorca.New("", "", 1300, 800)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ui.Close()
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ln.Close()
+	go http.Serve(ln, http.FileServer(FS))
+	ui.Load(fmt.Sprintf("http://%s", ln.Addr()))
+
 	d := &Drill{}
 	d.log = logrus.New()
-	app.Bind(d)
-	err := app.Run()
-	if err != nil {
-		d.log.Errorln(err)
-	}
+	ui.Bind("Open", d.Open)
+	ui.Bind("GetInfo", d.GetInfo)
+	ui.Bind("GetProfile", d.GetProfile)
+	ui.Bind("WriteParam", d.WriteParam)
+	ui.Bind("Close", d.Close)
+
+	// Wait for the browser window to be closed
+	<-ui.Done()
+
 	if d.driver != nil {
 		err := d.driver.Port.Close()
 		if err != nil {
