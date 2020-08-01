@@ -1,10 +1,13 @@
+// +build unit
+
 package twister
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/serialport"
-	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/tarm/serial"
@@ -51,9 +54,9 @@ func TestDrill_LoadProfile(t *testing.T) {
 
 func TestDrill_WriteParamUpdatesProfile(t *testing.T) {
 	dr := Drill{}
-	dr.Log = logrus.New()
+	dr.Log, _ = test.NewNullLogger()
 	config := &serial.Config{}
-	p, err := serialport.MakeSerialPort(config, true)
+	p, err := serialport.MakeFakePort(config)
 	assert.NoError(t, err)
 	dr.Driver = serialport.MakeDriver(p, dr.Log)
 	param := map[string]interface{}{
@@ -65,4 +68,10 @@ func TestDrill_WriteParamUpdatesProfile(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, uint16(50), dr.Profile.Fields[0].AD)
 	assert.Equal(t, uint16(30), dr.Profile.Fields[0].Torque)
+}
+
+func TestDrill_CloseNilPort(t *testing.T) {
+	dr := Drill{}
+	_, err := dr.Close()
+	assert.Error(t, errors.New("Port not open"), err)
 }

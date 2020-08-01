@@ -89,14 +89,17 @@ func (dr *Drill) Open(portName string) (string, error) {
 		dr.Driver.Port.Close()
 	}
 	config := &serial.Config{Name: portName, Baud: 9600, ReadTimeout: time.Second * 2}
-	var mock bool
+	var p serialport.Port
+	var err error
 	if portName == "COM999" {
-		mock = true
+		p, err = serialport.MakeFakePort(config)
+	} else {
+		p, err = serialport.MakeSerialPort(config)
 	}
-	p, err := serialport.MakeSerialPort(config, mock)
 	if err != nil {
 		return "", errors.New("Serial port error. Please check your port number and connection.")
 	}
+
 	dr.Driver = serialport.MakeDriver(p, dr.Log)
 	ok := dr.Driver.SendKeepAlive()
 	if !ok {

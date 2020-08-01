@@ -5,28 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
 	"github.com/sirupsen/logrus"
 	"github.com/tarm/serial"
 )
-
-func MakeSerialPort(config *serial.Config, isFake bool) (Port, error) {
-	var p Port
-	var err error
-	if isFake {
-		log.Println("Starting in MOCK mode")
-		p, err = MakeFakePort(config)
-	} else {
-		p, err = serial.OpenPort(config)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return p, nil
-}
 
 func MakeDriver(p Port, log *logrus.Logger) *Driver {
 	return &Driver{
@@ -154,22 +138,6 @@ func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 	}
 }
 
-func MakeCommand(dataInfo byte, responseLen int) *Command {
-	return &Command{
-		header:      0x21,
-		dataInfo:    dataInfo,
-		checkSum:    NibbledChecksum([]byte{dataInfo}),
-		responseLen: responseLen,
-	}
-}
-
-func NibbledChecksum(dataInfo []byte) [2]byte {
-	var checksum = message.Checksum(dataInfo)
-	var encodedChecksum [2]byte
-	copy(encodedChecksum[:], message.Encode([]byte{checksum}))
-	return encodedChecksum
-}
-
 type Message interface {
 	// Marshal serialises the message into an slice of bytes
 	Marshal() []byte
@@ -183,38 +151,8 @@ type Message interface {
 	Timeout() time.Duration
 }
 
-type Command struct {
-	header      byte
-	dataInfo    byte
-	checkSum    [2]byte
-	responseLen int
-	response    []byte
-}
-
-func (k *Command) Marshal() []byte {
-	return []byte{k.header, k.dataInfo, k.checkSum[0], k.checkSum[1]}
-}
-
-func (k *Command) Response() []byte {
-	return k.response
-}
-
-func (k *Command) ResponseLen() int {
-	return k.responseLen
-}
-
-func (k *Command) Retry() int {
-	return 3
-}
-
-func (k *Command) Timeout() time.Duration {
-	return time.Second
-}
-
-const KeepAlive = 0x07
-
 func (sp *Driver) SendKeepAlive() bool {
-	_, err := sp.write([]byte{KeepAlive})
+	_, err := sp.write([]byte{message.KeepAlive})
 	if err != nil {
 		return false
 	}
@@ -223,7 +161,7 @@ func (sp *Driver) SendKeepAlive() bool {
 	if err != nil {
 		return false
 	}
-	return buf[0] == KeepAlive
+	return buf[0] == message.KeepAlive
 }
 
 // Wrap write for easier debugging
@@ -250,10 +188,4 @@ func (sp *Driver) read(b []byte) (int, error) {
 	sp.Log.Printf("read %d bytes", n)
 	sp.Log.Printf("read %X", b)
 	return n, err
-}
-
-type Port interface {
-	Write(out []byte) (int, error)
-	Read([]byte) (int, error)
-	Close() error
 }
