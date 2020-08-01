@@ -17,7 +17,7 @@ func main() {
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
-	cmd := exec.Command("npm", "run", "build")
+	cmd = exec.Command("npm", "run", "build")
 	cmd.Dir = "frontend"
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
