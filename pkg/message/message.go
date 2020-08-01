@@ -13,6 +13,7 @@ const (
 	DrillTypeMsg        = 0x04
 	DrillIDMsg          = 0x05
 	SingleParamMsg      = 0x06
+	KeepAlive           = 0x07
 	CalibratedOffsetMsg = 0x11
 	CurrentOffsetMsg    = 0x16
 	BulkParamSendMsg    = 0x14
@@ -257,10 +258,4 @@ func (id *Offset) isValidChecksum() error {
 
 func (id *Offset) ToUInt16() uint16 {
 	return ToUInt16(id.message[:])[0]
-}
-
-type Command struct {
-	command byte
-	retries int
-	timeout int
 }

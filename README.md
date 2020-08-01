@@ -5,29 +5,34 @@ A demo application in Go
 ## Prerequisites
 
 - Go1.14
-- Wails v1.6.0+ `go get -u github.com/wailsapp/wails/cmd/wails`
+- golangci-lint 1.29.0
+- make
 - NodeJS
-- Docker (for building cross platform images)
+- Chrome or some other variant of chromium must be installed to run the built application
 
 ## Getting Started
 
-### Frontend
-
-`npm start` from the `backend/frontend` directory
-
-### Backend
-
-`wails serve` from the `backend` directory
-
 ### Building
 
-`wails build` produces a binary output in the `build` folder called twister. This binary a single executable containing both the backend and the frontend, packaged together.
+`make build`
 
-`wails build -p` packages the application on windows and macOS.
+Builds the app into the `/build` folder.
+
+### Frontend
+
+`npm start` from the `frontend` directory
+
+### Test
+
+`make test`
+
+### Lint
+
+`make lint`
 
 ## Overview
 
-The frontend is built in React using MaterialUI. It is integrated with the backend using [wails](https://wails.app/).
+The frontend is built in React using MaterialUI. It is integrated with the backend using [lorca](https://github.com/zserge/lorca).
 
 ## Serial Port
 
@@ -37,21 +42,4 @@ Currently all ports are opened with 8 data bits, 1 stop bit, no parity, no hardw
 
 ### Fake Port
 
-For better testing, a fake serial port has been implemented to enable testing.
-
-## CLI Reference
-
-### Read Parameters
-```
-twister read <config_file>
-```
-
-### Write Parameters
-```
-twister write <config_file>
-```
-
-### Get motor info
-```
-twister info
-```
+For better testing, a fake serial port has been implemented to enable testing. When COM Port 999 is selected, the fake serial port is used.

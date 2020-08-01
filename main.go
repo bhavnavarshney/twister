@@ -28,6 +28,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer ln.Close()
+	//nolint:errcheck
 	go http.Serve(ln, http.FileServer(FS))
 	err = ui.Load(fmt.Sprintf("http://%s", ln.Addr()))
 	if err != nil {
@@ -37,13 +38,7 @@ func main() {
 	d := &twister.Drill{}
 	d.Log = logrus.New()
 	d.FS = afero.NewOsFs()
-	ui.Bind("Open", d.Open)
-	ui.Bind("GetInfo", d.GetInfo)
-	ui.Bind("GetProfile", d.GetProfile)
-	ui.Bind("WriteParam", d.WriteParam)
-	ui.Bind("Close", d.Close)
-	ui.Bind("SaveProfile", d.SaveProfile)
-	ui.Bind("LoadProfile", d.LoadProfile)
+	bindHandlers(ui, d)
 
 	// Wait for the browser window to be closed
 	<-ui.Done()
@@ -53,5 +48,36 @@ func main() {
 		if err != nil {
 			d.Log.Errorln(err)
 		}
+	}
+}
+
+func bindHandlers(ui lorca.UI, d *twister.Drill) {
+	err := ui.Bind("Open", d.Open)
+	if err != nil {
+		panic(err)
+	}
+	err = ui.Bind("GetInfo", d.GetInfo)
+	if err != nil {
+		panic(err)
+	}
+	err = ui.Bind("GetProfile", d.GetProfile)
+	if err != nil {
+		panic(err)
+	}
+	err = ui.Bind("WriteParam", d.WriteParam)
+	if err != nil {
+		panic(err)
+	}
+	err = ui.Bind("Close", d.Close)
+	if err != nil {
+		panic(err)
+	}
+	err = ui.Bind("SaveProfile", d.SaveProfile)
+	if err != nil {
+		panic(err)
+	}
+	err = ui.Bind("LoadProfile", d.LoadProfile)
+	if err != nil {
+		panic(err)
 	}
 }
