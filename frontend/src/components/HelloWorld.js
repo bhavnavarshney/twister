@@ -14,9 +14,11 @@ function mapFieldsToProfile(fields) {
   });
 }
 
+// cleanFormat converts the data from string to integer
+// It also removes the offset on the ID, so that 1-24 is mapped to 0-23
 function cleanFormat(rowData) {
   return {
-    ID: rowData.ID,
+    ID: rowData.ID-1,
     AD: parseInt(rowData.AD),
     Torque: parseInt(rowData.Torque),
   };
@@ -62,6 +64,37 @@ export default function HelloWorld() {
   //   });
   // }, []);
 
+  const handleLoad = (fileList) => {
+    /*global LoadProfile*/
+    /*eslint no-undef: "error"*/
+    console.log(fileList[0])
+    fileList[0].text().then((fileContent)=>{
+      LoadProfile(fileContent)
+      .then((result) => {
+        console.log(result)
+        const newProfile = mapFieldsToProfile(result.Fields);
+        setProfile(newProfile);
+        enqueueSnackbar("Profile Loaded!", successSnackBarOptions);
+      })
+      .catch((err) => {
+        enqueueSnackbar("Error loading profile:" + err, errorSnackBarOptions);
+      });
+    })
+    
+  };
+
+  const handleSave = () => {
+    /*global SaveProfile*/
+    /*eslint no-undef: "error"*/
+    SaveProfile("./demo.csv")
+      .then((result) => {
+        enqueueSnackbar("Profile Saved!", successSnackBarOptions);
+      })
+      .catch((err) => {
+        enqueueSnackbar("Error saving profile:" + err, errorSnackBarOptions);
+      });
+  };
+
   const handleClose = () => {
     /*global Close*/
     /*eslint no-undef: "error"*/
@@ -82,13 +115,18 @@ export default function HelloWorld() {
   const handleGetCurrentOffset = () => {
     /*global GetCurrentOffset*/
     /*eslint no-undef: "error"*/
-    GetCurrentOffset().then((result)=>{
-      setCurrentOffset(result);
-      enqueueSnackbar("Current Offset Received", successSnackBarOptions);
-    }).catch((err)=>{
-      enqueueSnackbar("Error reading offset. Please try again.", errorSnackBarOptions);
-    })
-  }
+    GetCurrentOffset()
+      .then((result) => {
+        setCurrentOffset(result);
+        enqueueSnackbar("Current Offset Received", successSnackBarOptions);
+      })
+      .catch((err) => {
+        enqueueSnackbar(
+          "Error reading offset. Please try again.",
+          errorSnackBarOptions
+        );
+      });
+  };
 
   const handleSetPort = (e) => {
     setPort(e.target.value);
@@ -100,14 +138,14 @@ export default function HelloWorld() {
       .then((result) => {
         setIsConnected(true);
         enqueueSnackbar("Drill Connected", successSnackBarOptions);
-         /*global GetInfo*/
+        /*global GetInfo*/
         /*eslint no-undef: "error"*/
         GetInfo()
           .then((result) => {
             setInfo(result);
             setCurrentOffset(result.CurrentOffset);
-             /*global GetProfile*/
-             /*eslint no-undef: "error"*/
+            /*global GetProfile*/
+            /*eslint no-undef: "error"*/
             GetProfile().then((result) => {
               const newProfile = mapFieldsToProfile(result.Fields);
               setProfile(newProfile);
@@ -141,7 +179,7 @@ export default function HelloWorld() {
           const data = [...profile];
           data[data.indexOf(oldData)] = cleanFormat(newData);
           setProfile(data);
-           /*global WriteParam*/
+          /*global WriteParam*/
           /*eslint no-undef: "error"*/
           WriteParam(cleanFormat(newData))
             .then((result) => {
@@ -155,12 +193,15 @@ export default function HelloWorld() {
     });
 
   return (
-    <div className="App" style={{height:"100%"}}>
+    <div className="App" style={{ height: "100%" }}>
       <Grid container spacing={1}>
-        <Grid           style={{
+        <Grid
+          style={{
             minWidth: "288px",
             maxWidth: "288px",
-          }} item>
+          }}
+          item
+        >
           <InfoCard
             isConnected={isConnected}
             data={info}
@@ -169,6 +210,8 @@ export default function HelloWorld() {
             handleClose={handleClose}
             handleSetPort={handleSetPort}
             handleGetCurrentOffset={handleGetCurrentOffset}
+            handleSave={handleSave}
+            handleLoad={handleLoad}
           />
         </Grid>
         <Grid

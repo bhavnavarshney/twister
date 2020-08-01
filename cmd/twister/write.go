@@ -19,7 +19,7 @@ func Write(c *cli.Context) error {
 	d := serialport.MakeDriver(p, log)
 	data := new([24 * 4]byte)
 	torqueData := message.MakeTorqueData(*data)
-	err := d.SendMessage(torqueData)
+	err = d.SendMessage(torqueData)
 	if err != nil {
 		return err
 	}

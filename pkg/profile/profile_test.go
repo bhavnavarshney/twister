@@ -3,7 +3,6 @@
 package profile
 
 import (
-	"os"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -12,7 +11,8 @@ import (
 
 func TestLoadValidProfile(t *testing.T) {
 	fs := afero.NewOsFs()
-	profile, err := LoadProfile("../../config/default.csv", fs)
+	file, err := afero.ReadFile(fs, "../../config/default.csv")
+	profile, err := LoadProfile(string(file))
 	assert.NoError(t, err)
 	assert.Equal(t, uint16(60), profile.Fields[0].AD)
 	assert.Equal(t, uint16(4), profile.Fields[0].Torque)
@@ -20,74 +20,43 @@ func TestLoadValidProfile(t *testing.T) {
 	assert.Equal(t, uint16(7), profile.Fields[23].Torque)
 }
 
-func TestLoadNonExistentProfile(t *testing.T) {
-	fs := afero.NewOsFs()
-	profile, err := LoadProfile("nonexistentfile.csv", fs)
-	assert.EqualError(t, err, "open nonexistentfile.csv: no such file or directory")
-	t.Log(profile)
-}
-
 func TestLoadProfileUnevenRows(t *testing.T) {
-	fileName := "test/invalid.csv"
-	unevenFile := []byte(
-		`a,b,c
+	unevenFile := `a,b,c
 	1,2,3,4
-	`)
-	fs := afero.NewMemMapFs()
-	err := afero.WriteFile(fs, fileName, unevenFile, os.ModePerm)
-	assert.NoError(t, err)
-	profile, err := LoadProfile(fileName, fs)
+	`
+	profile, err := LoadProfile(unevenFile)
 	assert.EqualError(t, err, "record on line 2: wrong number of fields")
 	assert.Nil(t, profile)
 }
 
 func TestLoadProfileNoHeader(t *testing.T) {
-	fileName := "test/noheader.csv"
-	noHeaderFile := []byte(
-		`1,2,3`)
-	fs := afero.NewMemMapFs()
-	err := afero.WriteFile(fs, fileName, noHeaderFile, os.ModePerm)
-	assert.NoError(t, err)
-	profile, err := LoadProfile(fileName, fs)
+	noHeaderFile := `1,2,3`
+	profile, err := LoadProfile(noHeaderFile)
 	assert.EqualError(t, err, "header expected to be ID,Torque,TorqueAD")
 	assert.Nil(t, profile)
 }
 
 func TestLoadProfileInvalidHeader(t *testing.T) {
-	fileName := "test/noheader.csv"
-	noHeaderFile := []byte(
-		`a,b,c
-		1,2,3`)
-	fs := afero.NewMemMapFs()
-	err := afero.WriteFile(fs, fileName, noHeaderFile, os.ModePerm)
-	assert.NoError(t, err)
-	profile, err := LoadProfile(fileName, fs)
+	invalidHeaderFile := `a,b,c
+		1,2,3`
+	profile, err := LoadProfile(invalidHeaderFile)
 	assert.EqualError(t, err, "header expected to be ID,Torque,TorqueAD")
 	assert.Nil(t, profile)
 }
 
 func TestLoadProfileWrongHeaderLength(t *testing.T) {
-	fileName := "test/noheader.csv"
-	noHeaderFile := []byte(
+	noHeaderFile :=
 		`ID,Torque,TorqueAD,Extra
-		1,2,3,4`)
-	fs := afero.NewMemMapFs()
-	err := afero.WriteFile(fs, fileName, noHeaderFile, os.ModePerm)
-	assert.NoError(t, err)
-	profile, err := LoadProfile(fileName, fs)
+		1,2,3,4`
+	profile, err := LoadProfile(noHeaderFile)
 	assert.EqualError(t, err, "header expected to be 3 items")
 	assert.Nil(t, profile)
 }
 
 func TestLoadProfileInvalidChar(t *testing.T) {
-	fileName := "test/noheader.csv"
-	noHeaderFile := []byte(
-		`ID,Torque,TorqueAD
-		1,2,b`)
-	fs := afero.NewMemMapFs()
-	err := afero.WriteFile(fs, fileName, noHeaderFile, os.ModePerm)
-	assert.NoError(t, err)
-	profile, err := LoadProfile(fileName, fs)
+	noHeaderFile := `ID,Torque,TorqueAD
+		1,2,b`
+	profile, err := LoadProfile(noHeaderFile)
 	assert.EqualError(t, err, "error parsing profile: strconv.Atoi: parsing \"\\t\\t1\": invalid syntax")
 	assert.Nil(t, profile)
 }

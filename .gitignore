@@ -1,2 +1,4 @@
 cp.out
 build
+dist
+assets.go

@@ -105,12 +105,8 @@ func WriteRow(id ID, point Point) []string {
 }
 
 // LoadProfile takes an input file path and returns a Profile struct
-func LoadProfile(filepath string, fs afero.Fs) (*Profile, error) {
-	file, err := afero.ReadFile(fs, filepath)
-	if err != nil {
-		return nil, err
-	}
-	r := csv.NewReader(strings.NewReader(string(file)))
+func LoadProfile(file string) (*Profile, error) {
+	r := csv.NewReader(strings.NewReader(file))
 	rows, err := r.ReadAll()
 	if err != nil {
 		return nil, err
