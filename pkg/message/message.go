@@ -258,9 +258,3 @@ func (id *Offset) isValidChecksum() error {
 func (id *Offset) ToUInt16() uint16 {
 	return ToUInt16(id.message[:])[0]
 }
-
-type Command struct {
-	command byte
-	retries int
-	timeout int
-}

@@ -54,6 +54,7 @@ func (sp *Driver) SendMessage(m Message) error {
 		if err != nil {
 			errResp <- fmt.Errorf("error writing to port: %w", err)
 		}
+		//nolint:staticcheck
 		ticker := time.Tick(20 * time.Millisecond)
 		for {
 			select {
@@ -104,6 +105,7 @@ func (sp *Driver) SendCommand(m Message) ([]byte, error) {
 		if err != nil {
 			errResp <- fmt.Errorf("error writing to port: %w", err)
 		}
+		//nolint:staticcheck
 		ticker := time.Tick(20 * time.Millisecond)
 		for {
 			select {
