@@ -147,15 +147,19 @@ export default function InfoCard(props) {
           <Grid item xs={12}>
             <div>
               Load
-              <input type="file" id="input" accept=".csv" onChange={ (e) => props.handleLoad(e.target.files) }></input>
-              </div>
+              <input
+                type="file"
+                id="input"
+                accept=".csv"
+                onChange={(e) => props.handleLoad(e.target.files)}
+              ></input>
+            </div>
           </Grid>
           <Grid item xs={12}>
             <Button
               variant="contained"
               color="primary"
               disabled={!props.data.DrillID}
-              
             >
               Finish
             </Button>
