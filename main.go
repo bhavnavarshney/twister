@@ -80,4 +80,8 @@ func bindHandlers(ui lorca.UI, d *twister.Drill) {
 	if err != nil {
 		panic(err)
 	}
+	err = ui.Bind("LogProfile", d.LogProfile)
+	if err != nil {
+		panic(err)
+	}
 }

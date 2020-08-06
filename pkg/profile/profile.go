@@ -73,6 +73,17 @@ func (p *Profile) MarshalBytes() [24 * 2]uint16 {
 	return output
 }
 
+// MarshalRow converts the profile into a string slice in ascending order
+// e.g Torque[0], AD[0], Torque[1], AD[1]...
+func (p *Profile) MarshalRow() []string {
+	var r []string
+	for _, point := range p.Fields {
+		r = append(r, fmt.Sprintf("%d", point.Torque))
+		r = append(r, fmt.Sprintf("%d", point.AD))
+	}
+	return r
+}
+
 func (p *Profile) MarshalCSV() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	writer := csv.NewWriter(buf)

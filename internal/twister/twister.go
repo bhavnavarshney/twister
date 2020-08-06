@@ -50,6 +50,15 @@ func (dr *Drill) PollCurrentOffset() {
 	}()
 }
 
+func (dr *Drill) LogProfile() error {
+	//dr.Info
+	//dr.ID
+	//dr.CurrentOffset
+	//dr.CalibratedOffset
+	//dr.Profile
+	return nil
+}
+
 func (dr *Drill) SaveProfile(filepath string) error {
 	return profile.SaveProfile(&dr.Profile, filepath, dr.FS)
 }
