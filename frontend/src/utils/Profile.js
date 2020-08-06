@@ -1,4 +1,5 @@
 export function mapFieldsToProfile(fields) {
+    if (fields === null) return []
     return fields.map((item, index) => {
       return {
         ID: index + 1,

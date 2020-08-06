@@ -1,4 +1,4 @@
-import {cleanFormat} from "./Profile";
+import {cleanFormat, mapFieldsToProfile} from "./Profile";
 
 it("returnsCleanData", ()=>{
     const result = cleanFormat({
@@ -8,4 +8,18 @@ it("returnsCleanData", ()=>{
     })
     console.log(result)
     expect(result.ID).toBe(0)
+})
+
+it("mapsFieldsToProfile", ()=>{
+    const fields =  [{
+            Torque: 30,
+            AD: 30,
+        },]
+    const result = mapFieldsToProfile(fields)
+    expect(result).toEqual([{ID: 1, Torque: 30, AD: 30}])
+})
+
+it("mapsFieldsToProfileHandlesNull", ()=>{
+    const result = mapFieldsToProfile(null)
+    expect(result).toEqual([])
 })
