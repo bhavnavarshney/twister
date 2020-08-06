@@ -4,7 +4,7 @@ import Grid from "@material-ui/core/Grid";
 import InfoCard from "./InfoCard";
 import ParamTable from "./ParamTable";
 
-function mapFieldsToProfile(fields) {
+export function mapFieldsToProfile(fields) {
   return fields.map((item, index) => {
     return {
       ID: index + 1,
@@ -16,7 +16,7 @@ function mapFieldsToProfile(fields) {
 
 // cleanFormat converts the data from string to integer
 // It also removes the offset on the ID, so that 1-24 is mapped to 0-23
-function cleanFormat(rowData) {
+export function cleanFormat(rowData) {
   return {
     ID: rowData.ID - 1,
     AD: parseInt(rowData.AD),
@@ -24,7 +24,7 @@ function cleanFormat(rowData) {
   };
 }
 
-export default function HelloWorld() {
+export default function ParamView() {
   const [info, setInfo] = React.useState({});
   const [currentOffset, setCurrentOffset] = React.useState(null);
   const [port, setPort] = React.useState(3);
