@@ -84,10 +84,11 @@ func (p *Profile) MarshalRow() []string {
 	return r
 }
 
+// MarshalCSV converts the profile into a CSV formatted slice of bytes
 func (p *Profile) MarshalCSV() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	writer := csv.NewWriter(buf)
-	err := writer.Write(WriteHeader())
+	err := writer.Write(ProfileHeader())
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +104,8 @@ func (p *Profile) MarshalCSV() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func WriteHeader() []string {
-	return []string{FieldID, Torque, AD}
+func ProfileHeader() []string {
+	return []string{FieldIDHeader, TorqueHeader, ADHeader}
 }
 
 func WriteRow(id ID, point Point) []string {
@@ -144,9 +145,9 @@ func LoadProfile(file string) (*Profile, error) {
 }
 
 const (
-	FieldID = "ID"
-	Torque  = "Torque"
-	AD      = "TorqueAD"
+	FieldIDHeader = "ID"
+	TorqueHeader  = "Torque"
+	ADHeader      = "TorqueAD"
 )
 
 // TODO: Add dynamic row ordering
@@ -155,14 +156,14 @@ func ParseHeader(row []string) error {
 	if len(row) != 3 {
 		return errors.New("header expected to be 3 items")
 	}
-	if row[0] != FieldID || row[1] != Torque || row[2] != AD {
+	if row[0] != FieldIDHeader || row[1] != TorqueHeader || row[2] != ADHeader {
 		return errors.New("header expected to be " + strings.Join(BuildHeader(), ","))
 	}
 	return nil
 }
 
 func BuildHeader() []string {
-	return []string{FieldID, Torque, AD}
+	return []string{FieldIDHeader, TorqueHeader, ADHeader}
 }
 
 func ParseRow(row []string) (int, Point, error) {

@@ -20,11 +20,11 @@ type Drill struct {
 	FS               afero.Fs
 	Quit             chan struct{}
 	Driver           *serialport.Driver
-	ID               string
+	ID               string // Serial Number of the Motor e.g 0x181903040506
 	Profile          profile.Profile
 	CalibratedOffset uint16 // Indicates the zero value for the sensor
 	CurrentOffset    uint16 // Indicates the current zero value for the sensor, we need to poll this every second
-	Info             string
+	Info             string // Drill Model Type e.g NPT12
 	Log              *logrus.Logger
 }
 
