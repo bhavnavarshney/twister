@@ -160,6 +160,7 @@ export default function InfoCard(props) {
               variant="contained"
               color="primary"
               disabled={!props.data.DrillID}
+              onClick={props.handleFinish}
             >
               Finish
             </Button>
