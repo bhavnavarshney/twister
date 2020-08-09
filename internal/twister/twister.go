@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/csvlog"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/profile"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/serialport"
@@ -20,11 +21,11 @@ type Drill struct {
 	FS               afero.Fs
 	Quit             chan struct{}
 	Driver           *serialport.Driver
-	ID               string
+	ID               string // Serial Number of the Motor e.g 0x181903040506
 	Profile          profile.Profile
 	CalibratedOffset uint16 // Indicates the zero value for the sensor
 	CurrentOffset    uint16 // Indicates the current zero value for the sensor, we need to poll this every second
-	Info             string
+	Info             string // Drill Model Type e.g NPT12
 	Log              *logrus.Logger
 }
 
@@ -48,6 +49,19 @@ func (dr *Drill) PollCurrentOffset() {
 			}
 		}
 	}()
+}
+
+func (dr *Drill) LogProfile(dir string) error {
+	l := csvlog.New(dr.FS, dir)
+	lr := &csvlog.LogRecord{
+		Time:             time.Now(),
+		ID:               dr.ID,
+		Type:             dr.Info,
+		CurrentOffset:    dr.CurrentOffset,
+		CalibratedOffset: dr.CalibratedOffset,
+		ProfileData:      dr.Profile.MarshalRow(),
+	}
+	return l.Write(lr)
 }
 
 func (dr *Drill) SaveProfile(filepath string) error {
@@ -154,7 +168,6 @@ func (dr *Drill) GetInfo() (Info, error) {
 	if err != nil {
 		return Info{}, err
 	}
-	dr.ID = drillID.ToString()
 
 	currentOffsetCommand := serialport.MakeCommand(message.CurrentOffsetMsg, message.CurrentOffsetMsgLen)
 	response, err = dr.Driver.SendCommand(currentOffsetCommand)
@@ -180,6 +193,12 @@ func (dr *Drill) GetInfo() (Info, error) {
 
 	// Poll for current offset every second
 	dr.PollCurrentOffset()
+
+	// Update stored values
+	dr.ID = drillID.ToString()
+	dr.Info = drillType.ToString()
+	dr.CalibratedOffset = calibratedOffset.ToUInt16()
+	dr.CurrentOffset = currentOffset.ToUInt16()
 
 	return Info{
 		DrillType:        drillType.ToString(),

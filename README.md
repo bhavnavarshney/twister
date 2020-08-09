@@ -9,6 +9,7 @@ A demo application in Go
 - make
 - NodeJS
 - Chrome or some other variant of chromium must be installed to run the built application
+- After cloning the repo, run `git update-index --assume-unchanged assets.go` to ignore changes to `assets.go` which slows down git significantly as it is a large file (~37Mb)
 
 ## Getting Started
 

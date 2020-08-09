@@ -92,6 +92,18 @@ export default function ParamView() {
       });
   };
 
+  const handleLogProfile = () => {
+    /*global LogProfile*/
+    /*eslint no-undef: "error"*/
+    LogProfile("")
+      .then((result) => {
+        enqueueSnackbar("Profile Saved", infoSnackBarOptions);
+      })
+      .catch((err) => {
+        enqueueSnackbar("Error logging drill parameters:" + err, infoSnackBarOptions);
+      });
+  };
+
   const handleGetCurrentOffset = () => {
     /*global GetCurrentOffset*/
     /*eslint no-undef: "error"*/
@@ -192,6 +204,7 @@ export default function ParamView() {
             handleGetCurrentOffset={handleGetCurrentOffset}
             handleSave={handleSave}
             handleLoad={handleLoad}
+            handleFinish={handleLogProfile}
           />
         </Grid>
         <Grid

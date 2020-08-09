@@ -123,3 +123,13 @@ func TestMarshalBytesOrdered(t *testing.T) {
 	result := profile.MarshalBytes()
 	assert.Equal(t, expected, result)
 }
+
+func TestMarshalRow(t *testing.T) {
+	fs := afero.NewOsFs()
+	file, err := afero.ReadFile(fs, "../../config/default.csv")
+	profile, err := LoadProfile(string(file))
+	assert.NoError(t, err)
+	result := profile.MarshalRow()
+	expected := []string{"4", "60", "5", "72", "6", "83", "7", "94", "8", "108", "9", "122", "10", "131", "11", "153", "12", "168", "13", "180", "14", "191", "30", "30", "30", "30", "30", "30", "30", "30", "30", "30", "30", "30", "30", "30", "30", "30", "3", "50", "4", "60", "5", "72", "6", "83", "7", "94"}
+	assert.Equal(t, expected, result)
+}
