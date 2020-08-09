@@ -1,3 +1,5 @@
+// +build unit
+
 package csvlog
 
 import (
@@ -76,8 +78,8 @@ func Test_Logger_Write_CreatesFile(t *testing.T) {
 }
 
 func Test_Logger_Write_CreatesFileInCustomDirectory(t *testing.T) {
-	lr := &LogRecord{Time: time.Now()}
-	filePath := path.Join("logs" + lr.buildFileName())
+	lr := &LogRecord{Time: time.Now(), Type: "NPT12"}
+	filePath := path.Join("logs", lr.buildFileName())
 	fs := afero.NewMemMapFs()
 	l := Logger{
 		FS:  fs,

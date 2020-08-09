@@ -57,14 +57,17 @@ func (l *Logger) Write(lr *LogRecord) error {
 	if err != nil {
 		return err
 	}
+	// Create the dir in case it doesn't exist
+	err = l.FS.MkdirAll(l.Dir, os.ModePerm)
+	if err != nil {
+		return err
+	}
 	logFile, err := l.FS.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
 	w := csv.NewWriter(logFile)
 	if !fileExists {
-		// Create the dir in case it doesn't exist
-		l.FS.MkdirAll(l.Dir, os.ModePerm)
 		err = w.Write(buildHeader())
 		if err != nil {
 			return err
