@@ -16,6 +16,9 @@ type Logger struct {
 }
 
 func New(fs afero.Fs, dir string) *Logger {
+	if dir == "" {
+		dir = "log"
+	}
 	return &Logger{
 		FS:  fs,
 		Dir: dir,
@@ -38,10 +41,11 @@ func (lr *LogRecord) buildFileName() string {
 
 func (lr *LogRecord) buildRow() []string {
 	date := fmt.Sprintf("%d/%02d/%02d", lr.Time.Year(), lr.Time.Month(), lr.Time.Day())
-	time := fmt.Sprintf("%02d/%02d/%02d", lr.Time.Hour(), lr.Time.Minute(), lr.Time.Second())
+	time := fmt.Sprintf("%02d:%02d:%02d", lr.Time.Hour(), lr.Time.Minute(), lr.Time.Second())
+	drillID := fmt.Sprintf("0x%s", lr.ID)
 	currentOffset := fmt.Sprintf("%d", lr.CurrentOffset)
 	calibratedOffset := fmt.Sprintf("%d", lr.CalibratedOffset)
-	record := []string{date, time, currentOffset, calibratedOffset}
+	record := []string{date, time, drillID, currentOffset, calibratedOffset}
 	return append(record, lr.ProfileData...)
 }
 

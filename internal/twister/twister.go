@@ -51,8 +51,8 @@ func (dr *Drill) PollCurrentOffset() {
 	}()
 }
 
-func (dr *Drill) LogProfile() error {
-	l := csvlog.New(dr.FS, "")
+func (dr *Drill) LogProfile(dir string) error {
+	l := csvlog.New(dr.FS, dir)
 	lr := &csvlog.LogRecord{
 		Time:             time.Now(),
 		Type:             dr.Info,
