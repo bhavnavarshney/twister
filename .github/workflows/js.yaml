@@ -1,0 +1,21 @@
+on: [push]
+name: JS Test
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Use Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+    - name: Test
+      run: make test-frontend
+      env:
+        CI: true
+    - name: Generate build
+      run: make build-frontend
