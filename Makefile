@@ -1,6 +1,6 @@
 all: lint test generate build
 
-.PHONY: lint test test-integration generate cover build install-frontend
+.PHONY: lint test test-integration generate cover build install-frontend build-frontend
 
 lint:
 	golangci-lint run ./...
@@ -20,8 +20,8 @@ test-frontend: install-frontend
 build-frontend: install-frontend
 	cd frontend && yarn build
 
-generate:
-	go generate
+generate: build-frontend
+	go generate && echo '//+build ignorelint\n' | cat - assets.go > temp && mv temp assets.go
 	
 cover:
 	go test -tags=unit -coverprofile cp.out ./...
@@ -30,4 +30,4 @@ cover:
 build: generate
 	rm -rf dist
 	mkdir dist
-	go build -o dist
+	go build -tags=ignorelint -o dist
