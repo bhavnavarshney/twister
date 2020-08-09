@@ -1,6 +1,6 @@
 all: lint test generate build
 
-.PHONY: lint test test-integration generate cover build
+.PHONY: lint test test-integration generate cover build install-frontend
 
 lint:
 	golangci-lint run ./...
@@ -10,6 +10,15 @@ test: # Runs unit tests
 
 test-integration:
 	go test -tags=integration ./...
+
+install-frontend:
+	cd frontend && yarn install
+
+test-frontend: install-frontend
+	cd frontend && yarn test
+
+build-frontend: install-frontend
+	cd frontend && yarn build
 
 generate:
 	go generate

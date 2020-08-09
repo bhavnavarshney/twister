@@ -3,28 +3,9 @@ import { useSnackbar } from "notistack";
 import Grid from "@material-ui/core/Grid";
 import InfoCard from "./InfoCard";
 import ParamTable from "./ParamTable";
+import {mapFieldsToProfile, cleanFormat} from "../utils/Profile";
 
-function mapFieldsToProfile(fields) {
-  return fields.map((item, index) => {
-    return {
-      ID: index + 1,
-      Torque: item.Torque,
-      AD: item.AD,
-    };
-  });
-}
-
-// cleanFormat converts the data from string to integer
-// It also removes the offset on the ID, so that 1-24 is mapped to 0-23
-function cleanFormat(rowData) {
-  return {
-    ID: rowData.ID-1,
-    AD: parseInt(rowData.AD),
-    Torque: parseInt(rowData.Torque),
-  };
-}
-
-export default function HelloWorld() {
+export default function ParamView() {
   const [info, setInfo] = React.useState({});
   const [currentOffset, setCurrentOffset] = React.useState(null);
   const [port, setPort] = React.useState(3);
@@ -67,20 +48,19 @@ export default function HelloWorld() {
   const handleLoad = (fileList) => {
     /*global LoadProfile*/
     /*eslint no-undef: "error"*/
-    console.log(fileList[0])
-    fileList[0].text().then((fileContent)=>{
+    console.log(fileList[0]);
+    fileList[0].text().then((fileContent) => {
       LoadProfile(fileContent)
-      .then((result) => {
-        console.log(result)
-        const newProfile = mapFieldsToProfile(result.Fields);
-        setProfile(newProfile);
-        enqueueSnackbar("Profile Loaded!", successSnackBarOptions);
-      })
-      .catch((err) => {
-        enqueueSnackbar("Error loading profile:" + err, errorSnackBarOptions);
-      });
-    })
-    
+        .then((result) => {
+          console.log(result);
+          const newProfile = mapFieldsToProfile(result.Fields);
+          setProfile(newProfile);
+          enqueueSnackbar("Profile Loaded!", successSnackBarOptions);
+        })
+        .catch((err) => {
+          enqueueSnackbar("Error loading profile:" + err, errorSnackBarOptions);
+        });
+    });
   };
 
   const handleSave = () => {
