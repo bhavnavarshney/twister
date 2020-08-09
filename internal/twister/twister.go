@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/csvlog"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/message"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/profile"
 	"github.com/cuminandpaprika/TorqueCalibrationGo/pkg/serialport"
@@ -51,12 +52,15 @@ func (dr *Drill) PollCurrentOffset() {
 }
 
 func (dr *Drill) LogProfile() error {
-	//dr.Info
-	//dr.ID
-	//dr.CurrentOffset
-	//dr.CalibratedOffset
-	//dr.Profile
-	return nil
+	l := csvlog.New(dr.FS, "")
+	lr := &csvlog.LogRecord{
+		Time:             time.Now(),
+		Type:             dr.Info,
+		CurrentOffset:    dr.CurrentOffset,
+		CalibratedOffset: dr.CalibratedOffset,
+		ProfileData:      dr.Profile.MarshalRow(),
+	}
+	return l.Write(lr)
 }
 
 func (dr *Drill) SaveProfile(filepath string) error {
