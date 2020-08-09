@@ -55,6 +55,7 @@ func (dr *Drill) LogProfile(dir string) error {
 	l := csvlog.New(dr.FS, dir)
 	lr := &csvlog.LogRecord{
 		Time:             time.Now(),
+		ID:               dr.ID,
 		Type:             dr.Info,
 		CurrentOffset:    dr.CurrentOffset,
 		CalibratedOffset: dr.CalibratedOffset,
@@ -167,7 +168,6 @@ func (dr *Drill) GetInfo() (Info, error) {
 	if err != nil {
 		return Info{}, err
 	}
-	dr.ID = drillID.ToString()
 
 	currentOffsetCommand := serialport.MakeCommand(message.CurrentOffsetMsg, message.CurrentOffsetMsgLen)
 	response, err = dr.Driver.SendCommand(currentOffsetCommand)
@@ -193,6 +193,12 @@ func (dr *Drill) GetInfo() (Info, error) {
 
 	// Poll for current offset every second
 	dr.PollCurrentOffset()
+
+	// Update stored values
+	dr.ID = drillID.ToString()
+	dr.Info = drillType.ToString()
+	dr.CalibratedOffset = calibratedOffset.ToUInt16()
+	dr.CurrentOffset = currentOffset.ToUInt16()
 
 	return Info{
 		DrillType:        drillType.ToString(),

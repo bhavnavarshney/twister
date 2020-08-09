@@ -45,7 +45,7 @@ func (lr *LogRecord) buildRow() []string {
 	drillID := fmt.Sprintf("0x%s", lr.ID)
 	currentOffset := fmt.Sprintf("%d", lr.CurrentOffset)
 	calibratedOffset := fmt.Sprintf("%d", lr.CalibratedOffset)
-	record := []string{date, time, drillID, currentOffset, calibratedOffset}
+	record := []string{date, time, drillID, calibratedOffset, currentOffset}
 	return append(record, lr.ProfileData...)
 }
 
@@ -89,11 +89,11 @@ func (l *Logger) Write(lr *LogRecord) error {
 func buildHeader() []string {
 	headerFields := []string{"Date(YYYY/MM/DD)", "Time", "Tool_ID (Hex)", "Calibrated Offset(Dec)", "Current Offset(Dec)"}
 	for i := 0; i < 12; i++ {
-		headerFields = append(headerFields, fmt.Sprintf("CW Toq[%d] (Dec)", i+1))
+		headerFields = append(headerFields, fmt.Sprintf("CW Torq[%d] (Dec)", i+1))
 		headerFields = append(headerFields, fmt.Sprintf("CW AD[%d] (Dec)", i+1))
 	}
 	for i := 0; i < 12; i++ {
-		headerFields = append(headerFields, fmt.Sprintf("CCW Toq[%d] (Dec)", i+1))
+		headerFields = append(headerFields, fmt.Sprintf("CCW Torq[%d] (Dec)", i+1))
 		headerFields = append(headerFields, fmt.Sprintf("CCW AD[%d] (Dec)", i+1))
 	}
 	return headerFields
