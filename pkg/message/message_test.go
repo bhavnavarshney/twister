@@ -3,7 +3,6 @@
 package message
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,27 +39,10 @@ func TestChecksumReadCommand(t *testing.T) {
 }
 
 func TestMakeTorqueData(t *testing.T) {
-	type args struct {
-		message [24 * 4]byte
-	}
-	tests := []struct {
-		name string
-		args args
-		want *TorqueData
-	}{
-		{
-			name: "InstanceCheck",
-			want: &TorqueData{
-				header:   HeaderByte,
-				dataInfo: BulkParamSendMsg,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := MakeTorqueData(tt.args.message); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MakeTorqueData() = %v, want %+v", got, tt.want)
-			}
-		})
-	}
+	testMessage := [24 * 4]byte{}
+	want := &TorqueData{header: HeaderByte, dataInfo: BulkParamSendMsg}
+	r := MakeTorqueData(testMessage)
+	assert.Equal(t, want.header, r.header)
+	assert.Equal(t, want.dataInfo, r.dataInfo)
+	assert.Equal(t, testMessage, r.message)
 }
